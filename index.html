@@ -357,13 +357,18 @@
 
             <!-- ================= TAB 3: NHL SEASON & CAREER STATS ================= -->
             <section id="view-stats" class="hidden space-y-3">
-                <div class="flex justify-between items-center">
+                <div class="flex justify-between items-center gap-2">
                     <h2 class="text-xs font-black uppercase text-slate-300 tracking-wider">Season Breakdown</h2>
-                    <select id="seasonFilter" onchange="renderStatsTables()" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs text-oilGold font-bold">
-                        <option value="ALL">All Seasons (Career)</option>
-                        <option value="2026-27" selected>2026-27 Season</option>
-                        <option value="2025-26">2025-26 Season</option>
-                    </select>
+                    <div class="flex items-center gap-1.5">
+                        <button type="button" onclick="openSeasonEditorModal()" class="text-[11px] bg-oilGreen hover:bg-emerald-800 text-oilGold px-2.5 py-1 rounded-lg font-bold border border-oilGold/40 active:scale-95">
+                            + Add / Edit Season
+                        </button>
+                        <select id="seasonFilter" onchange="renderStatsTables()" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs text-oilGold font-bold">
+                            <option value="ALL">All Seasons (Career)</option>
+                            <option value="2026-27" selected>2026-27 Season</option>
+                            <option value="2025-26">2025-26 Season</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-3 gap-2">
@@ -382,8 +387,9 @@
                 </div>
 
                 <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-                    <div class="bg-slate-950 px-3 py-2 border-b border-slate-800">
-                        <span class="text-[10px] font-black uppercase text-oilGold">NHL Official Career Totals</span>
+                    <div class="bg-slate-950 px-3 py-2 border-b border-slate-800 flex justify-between items-center">
+                        <span class="text-[10px] font-black uppercase text-oilGold">EFHL Official Career Totals</span>
+                        <span class="text-[9px] text-slate-400 font-semibold">Tap a season row to edit</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-[11px] text-left">
@@ -397,6 +403,7 @@
                                     <th class="p-2 text-center">SOG</th>
                                     <th class="p-2 text-center">FO%</th>
                                     <th class="p-2 text-center">PIM</th>
+                                    <th class="p-2 text-center">Edit</th>
                                 </tr>
                             </thead>
                             <tbody id="careerStatsBody" class="divide-y divide-slate-800 font-semibold">
@@ -623,6 +630,62 @@
         </div>
     </div>
 
+    <!-- ================= MODAL 5: ADD / EDIT PAST SEASON TOTALS ================= -->
+    <div id="seasonEditorModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-4 space-y-2.5 text-left max-h-[90dvh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 id="seasonModalTitle" class="font-black text-white text-sm uppercase">Add / Edit EFHL Season</h3>
+                <button type="button" onclick="closeSeasonEditorModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Season Label</label>
+                    <input type="text" id="seasonEditName" placeholder="e.g., 2024-25" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Games Played (GP)</label>
+                    <input type="number" id="seasonEditGP" value="0" min="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Goals (G)</label>
+                    <input type="number" id="seasonEditG" value="0" min="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Assists (A)</label>
+                    <input type="number" id="seasonEditA" value="0" min="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Shots (SOG)</label>
+                    <input type="number" id="seasonEditSOG" value="0" min="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">FO Wins</label>
+                    <input type="number" id="seasonEditFOW" value="0" min="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">FO Losses</label>
+                    <input type="number" id="seasonEditFOL" value="0" min="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">PIM</label>
+                    <input type="number" id="seasonEditPIM" value="0" min="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+            </div>
+
+            <div class="flex gap-2 pt-2">
+                <button type="button" onclick="closeSeasonEditorModal()" class="w-1/2 bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">Cancel</button>
+                <button type="button" onclick="saveSeasonTotals()" class="w-1/2 bg-oilGreen text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40">Save Season</button>
+            </div>
+        </div>
+    </div>
+
     <!-- FIREBASE CLOUD SYNC MODULE (Ready when MANUAL_FIREBASE_CONFIG is added) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -696,10 +759,14 @@
                         if (cloudData.buttonSettings) {
                             window.buttonSettings = window.normalizeButtonSettings(cloudData.buttonSettings);
                         }
+                        if (cloudData.seasonOverrides && typeof cloudData.seasonOverrides === 'object') {
+                            window.seasonOverrides = window.normalizeSeasonOverrides(cloudData.seasonOverrides);
+                        }
                         try {
                             localStorage.setItem('swz_playerProfile', JSON.stringify(window.playerProfile));
                             localStorage.setItem('swz_savedGames', JSON.stringify(window.savedGames));
                             localStorage.setItem('swz_buttonSettings', JSON.stringify(window.buttonSettings));
+                            localStorage.setItem('swz_seasonOverrides', JSON.stringify(window.seasonOverrides));
                         } catch (e) {}
 
                         window.applyButtonSettings();
@@ -726,6 +793,7 @@
                         playerProfile: window.playerProfile,
                         savedGames: window.savedGames,
                         buttonSettings: window.buttonSettings,
+                        seasonOverrides: window.seasonOverrides,
                         updatedAt: new Date().toISOString()
                     });
                     this.updateBadge("Cloud Live", "text-emerald-400");
@@ -815,10 +883,32 @@
             };
         };
 
+        window.normalizeSeasonOverrides = function(raw) {
+            const clean = {};
+            if (!raw || typeof raw !== 'object') return clean;
+            Object.keys(raw).forEach(seasonKey => {
+                const label = String(seasonKey || '').trim();
+                const entry = raw[seasonKey];
+                if (!label || !entry || typeof entry !== 'object') return;
+                clean[label] = {
+                    season: label,
+                    GP: Number(entry.GP) || 0,
+                    G: Number(entry.G) || 0,
+                    A: Number(entry.A) || 0,
+                    SOG: Number(entry.SOG) || 0,
+                    FOW: Number(entry.FOW) || 0,
+                    FOL: Number(entry.FOL) || 0,
+                    PIM: Number(entry.PIM) || 0
+                };
+            });
+            return clean;
+        };
+
         // Global State
         window.playerProfile = Object.assign({}, DEFAULT_PROFILE);
         window.buttonSettings = Object.assign({}, DEFAULT_BUTTON_SETTINGS);
         window.savedGames = [];
+        window.seasonOverrides = {};
         window.liveEventLog = [];
         window.pendingAvatarDataUrl = "";
         window.strengthMode = "EV"; // "EV", "PP", or "SH"
@@ -1646,6 +1736,101 @@
         }
 
         // Render History & Stats
+        function getAllSeasonNames() {
+            const set = new Set(["2026-27", "2025-26"]);
+            window.savedGames.forEach(g => {
+                if (g.season) set.add(String(g.season));
+            });
+            Object.keys(window.seasonOverrides || {}).forEach(s => {
+                if (s) set.add(String(s));
+            });
+            return Array.from(set).sort((a, b) => b.localeCompare(a));
+        }
+
+        function syncSeasonFilterOptions() {
+            const select = document.getElementById('seasonFilter');
+            if (!select) return;
+            const currentVal = select.value || "2026-27";
+            const seasons = getAllSeasonNames();
+            select.innerHTML = [
+                '<option value="ALL">All Seasons (Career)</option>',
+                ...seasons.map(s => `<option value="${s}">${s} Season</option>`)
+            ].join('');
+            if (Array.from(select.options).some(opt => opt.value === currentVal)) {
+                select.value = currentVal;
+            } else {
+                select.value = seasons.includes("2026-27") ? "2026-27" : "ALL";
+            }
+        }
+
+        function getSeasonTotals(seasonName) {
+            if (window.seasonOverrides && window.seasonOverrides[seasonName]) {
+                const ov = window.seasonOverrides[seasonName];
+                return {
+                    season: seasonName,
+                    GP: Number(ov.GP) || 0,
+                    G: Number(ov.G) || 0,
+                    A: Number(ov.A) || 0,
+                    SOG: Number(ov.SOG) || 0,
+                    FOW: Number(ov.FOW) || 0,
+                    FOL: Number(ov.FOL) || 0,
+                    PIM: Number(ov.PIM) || 0
+                };
+            }
+            const list = window.savedGames.filter(x => x.season === seasonName);
+            return {
+                season: seasonName,
+                GP: list.length,
+                G: list.reduce((sum, x) => sum + x.G, 0),
+                A: list.reduce((sum, x) => sum + x.A, 0),
+                SOG: list.reduce((sum, x) => sum + x.SOG, 0),
+                FOW: list.reduce((sum, x) => sum + x.FOW, 0),
+                FOL: list.reduce((sum, x) => sum + x.FOL, 0),
+                PIM: list.reduce((sum, x) => sum + x.PIM, 0)
+            };
+        }
+
+        function openSeasonEditorModal(existingSeason = "") {
+            const targetSeason = existingSeason || "";
+            const existing = targetSeason ? getSeasonTotals(targetSeason) : null;
+            document.getElementById('seasonModalTitle').textContent = existing
+                ? `Edit ${existing.season} EFHL Season`
+                : "Add / Edit EFHL Season";
+            document.getElementById('seasonEditName').value = existing ? existing.season : "";
+            document.getElementById('seasonEditGP').value = existing ? existing.GP : 0;
+            document.getElementById('seasonEditG').value = existing ? existing.G : 0;
+            document.getElementById('seasonEditA').value = existing ? existing.A : 0;
+            document.getElementById('seasonEditSOG').value = existing ? existing.SOG : 0;
+            document.getElementById('seasonEditFOW').value = existing ? existing.FOW : 0;
+            document.getElementById('seasonEditFOL').value = existing ? existing.FOL : 0;
+            document.getElementById('seasonEditPIM').value = existing ? existing.PIM : 0;
+            document.getElementById('seasonEditorModal').classList.remove('hidden');
+        }
+
+        function closeSeasonEditorModal() {
+            document.getElementById('seasonEditorModal').classList.add('hidden');
+        }
+
+        function saveSeasonTotals() {
+            const seasonLabel = document.getElementById('seasonEditName').value.trim();
+            if (!seasonLabel) return;
+
+            window.seasonOverrides[seasonLabel] = {
+                season: seasonLabel,
+                GP: Math.max(0, parseInt(document.getElementById('seasonEditGP').value) || 0),
+                G: Math.max(0, parseInt(document.getElementById('seasonEditG').value) || 0),
+                A: Math.max(0, parseInt(document.getElementById('seasonEditA').value) || 0),
+                SOG: Math.max(0, parseInt(document.getElementById('seasonEditSOG').value) || 0),
+                FOW: Math.max(0, parseInt(document.getElementById('seasonEditFOW').value) || 0),
+                FOL: Math.max(0, parseInt(document.getElementById('seasonEditFOL').value) || 0),
+                PIM: Math.max(0, parseInt(document.getElementById('seasonEditPIM').value) || 0)
+            };
+
+            saveToStorage();
+            renderStatsTables();
+            closeSeasonEditorModal();
+        }
+
         window.updateStatsSummary = function() {
             const seasonGames = window.savedGames.filter(g => g.season === "2026-27");
             const gp = seasonGames.length;
@@ -1700,44 +1885,39 @@
         };
 
         window.renderStatsTables = function() {
+            syncSeasonFilterOptions();
             const filter = document.getElementById('seasonFilter').value;
-            const filtered = filter === 'ALL' ? window.savedGames : window.savedGames.filter(g => g.season === filter);
+            const seasons = getAllSeasonNames();
+            const seasonRows = seasons.map(s => getSeasonTotals(s));
+            const activeRows = filter === 'ALL' ? seasonRows : seasonRows.filter(r => r.season === filter);
 
-            const gp = filtered.length;
-            const g = filtered.reduce((s, x) => s + x.G, 0);
-            const a = filtered.reduce((s, x) => s + x.A, 0);
+            const gp = activeRows.reduce((s, x) => s + x.GP, 0);
+            const g = activeRows.reduce((s, x) => s + x.G, 0);
+            const a = activeRows.reduce((s, x) => s + x.A, 0);
             const pts = g + a;
-            const sog = filtered.reduce((s, x) => s + x.SOG, 0);
-            const fow = filtered.reduce((s, x) => s + x.FOW, 0);
-            const fol = filtered.reduce((s, x) => s + x.FOL, 0);
+            const sog = activeRows.reduce((s, x) => s + x.SOG, 0);
+            const fow = activeRows.reduce((s, x) => s + x.FOW, 0);
+            const fol = activeRows.reduce((s, x) => s + x.FOL, 0);
 
             document.getElementById('statPPG').textContent = gp > 0 ? (pts / gp).toFixed(2) : "0.00";
             document.getElementById('statShPct').textContent = sog > 0 ? ((g / sog) * 100).toFixed(1) + "%" : "0.0%";
             document.getElementById('statFOPct').textContent = (fow + fol) > 0 ? ((fow / (fow + fol)) * 100).toFixed(1) + "%" : "0.0%";
 
-            const seasons = ["2026-27", "2025-26"];
             const tbody = document.getElementById('careerStatsBody');
-            tbody.innerHTML = seasons.map(s => {
-                const list = window.savedGames.filter(x => x.season === s);
-                const sGP = list.length;
-                const sG = list.reduce((sum, x) => sum + x.G, 0);
-                const sA = list.reduce((sum, x) => sum + x.A, 0);
-                const sSOG = list.reduce((sum, x) => sum + x.SOG, 0);
-                const sFOW = list.reduce((sum, x) => sum + x.FOW, 0);
-                const sFOL = list.reduce((sum, x) => sum + x.FOL, 0);
-                const sPIM = list.reduce((sum, x) => sum + x.PIM, 0);
-                const foPct = (sFOW + sFOL) > 0 ? Math.round((sFOW / (sFOW + sFOL)) * 100) + "%" : "-";
+            tbody.innerHTML = seasonRows.map(r => {
+                const foPct = (r.FOW + r.FOL) > 0 ? Math.round((r.FOW / (r.FOW + r.FOL)) * 100) + "%" : "-";
 
                 return `
-                    <tr>
-                        <td class="p-2 text-white font-bold">${s}</td>
-                        <td class="p-2 text-center">${sGP}</td>
-                        <td class="p-2 text-center text-emerald-400">${sG}</td>
-                        <td class="p-2 text-center text-blue-400">${sA}</td>
-                        <td class="p-2 text-center text-oilGold font-black">${sG + sA}</td>
-                        <td class="p-2 text-center">${sSOG}</td>
+                    <tr onclick="openSeasonEditorModal('${r.season}')" class="cursor-pointer hover:bg-slate-800/60 transition">
+                        <td class="p-2 text-white font-bold">${r.season}</td>
+                        <td class="p-2 text-center">${r.GP}</td>
+                        <td class="p-2 text-center text-emerald-400">${r.G}</td>
+                        <td class="p-2 text-center text-blue-400">${r.A}</td>
+                        <td class="p-2 text-center text-oilGold font-black">${r.G + r.A}</td>
+                        <td class="p-2 text-center">${r.SOG}</td>
                         <td class="p-2 text-center">${foPct}</td>
-                        <td class="p-2 text-center text-amber-400">${sPIM}</td>
+                        <td class="p-2 text-center text-amber-400">${r.PIM}</td>
+                        <td class="p-2 text-center"><button type="button" onclick="event.stopPropagation(); openSeasonEditorModal('${r.season}')" class="text-oilGold hover:text-white"><i class="fa-solid fa-pen"></i></button></td>
                     </tr>
                 `;
             }).join('');
@@ -1781,6 +1961,7 @@
                 localStorage.setItem('swz_playerProfile', JSON.stringify(window.playerProfile));
                 localStorage.setItem('swz_savedGames', JSON.stringify(window.savedGames));
                 localStorage.setItem('swz_buttonSettings', JSON.stringify(window.buttonSettings));
+                localStorage.setItem('swz_seasonOverrides', JSON.stringify(window.seasonOverrides));
             } catch (e) {
                 console.warn("localStorage write failed:", e);
             }
@@ -1797,6 +1978,9 @@
                 const btnRaw = localStorage.getItem('swz_buttonSettings');
                 if (btnRaw) window.buttonSettings = window.normalizeButtonSettings(JSON.parse(btnRaw));
 
+                const seasonRaw = localStorage.getItem('swz_seasonOverrides');
+                if (seasonRaw) window.seasonOverrides = window.normalizeSeasonOverrides(JSON.parse(seasonRaw));
+
                 const gamesRaw = localStorage.getItem('swz_savedGames');
                 if (gamesRaw) {
                     const parsed = JSON.parse(gamesRaw);
@@ -1806,6 +1990,7 @@
             } catch (e) {
                 window.playerProfile = window.normalizePlayerProfile({});
                 window.buttonSettings = window.normalizeButtonSettings({});
+                window.seasonOverrides = {};
                 window.savedGames = [];
             }
         }
