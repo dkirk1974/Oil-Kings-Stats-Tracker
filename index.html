@@ -444,13 +444,9 @@
                     <input type="text" id="modalDate" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs font-bold text-white">
                 </div>
                 <div>
-                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Player Headshot (From Phone Gallery)</label>
-                <label class="w-full bg-slate-800 hover:bg-slate-700 border border-dashed border-oilGold/60 text-oilGold font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer transition">
-                    <i class="fa-solid fa-camera"></i>
-                    <span id="photoUploadLabel">Choose Photo from Pixel</span>
-                    <input type="file" id="editPhotoFile" accept="image/*" onchange="handlePhotoFileSelect(event)" class="hidden">
-                </label>
-                <input type="hidden" id="editPhotoUrl">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">TOI (Mins)</label>
+                    <input type="number" id="modalTOIMins" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs font-bold text-white">
+                </div>
             </div>
 
             <div class="flex gap-2 pt-2">
@@ -515,8 +511,13 @@
             </div>
 
             <div>
-                <label class="text-[10px] font-bold text-slate-400 uppercase">Photo Source / URL</label>
-                <input type="text" id="editPhotoUrl" placeholder="Image URL or local path" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs font-bold text-white">
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Player Headshot (From Phone Gallery)</label>
+                <label class="w-full bg-slate-800 hover:bg-slate-700 border border-dashed border-oilGold/60 text-oilGold font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer transition">
+                    <i class="fa-solid fa-camera"></i>
+                    <span id="photoUploadLabel">Choose Photo from Pixel</span>
+                    <input type="file" id="editPhotoFile" accept="image/*" onchange="handlePhotoFileSelect(event)" class="hidden">
+                </label>
+                <input type="hidden" id="editPhotoUrl">
             </div>
 
             <div class="flex gap-2 pt-2">
@@ -1123,32 +1124,6 @@
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
-        }
-
-        function savePlayerProfile() {
-            window.playerProfile.firstName = document.getElementById('editFirstName').value || "Darren";
-            window.playerProfile.lastName = document.getElementById('editLastName').value || "Son";
-            window.playerProfile.jersey = document.getElementById('editJersey').value || "44";
-            window.playerProfile.height = document.getElementById('editHeight').value || `5'6"`;
-            window.playerProfile.weight = document.getElementById('editWeight').value || "140 lbs";
-            window.playerProfile.position = document.getElementById('editPosition').value || "Center";
-            window.playerProfile.shoots = document.getElementById('editShoots').value || "L";
-            window.playerProfile.photoUrl = document.getElementById('editPhotoUrl').value || "8ae70b08-a80f-4c01-a848-ff65659dddfb.jpg.jpeg";
-
-            saveToStorage();
-            updatePlayerHeaderDisplay();
-            toggleEditProfileModal();
-        }
-
-        function updatePlayerHeaderDisplay() {
-            document.getElementById('displayName').innerHTML = `${window.playerProfile.firstName} <span class="text-oilGold">${window.playerProfile.lastName}</span>`;
-            document.getElementById('displayJerseyPos').innerText = `#${window.playerProfile.jersey} • ${window.playerProfile.position}`;
-            document.getElementById('playerJerseyBadge').innerText = `#${window.playerProfile.jersey}`;
-            document.getElementById('displayPhysical').innerText = `${window.playerProfile.height} • ${window.playerProfile.weight}`;
-            document.getElementById('displayShoots').innerText = window.playerProfile.shoots;
-            if(window.playerProfile.photoUrl) {
-                document.getElementById('playerHeadshot').src = window.playerProfile.photoUrl;
-            }
         }
 
         function savePlayerProfile() {
