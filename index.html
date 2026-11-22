@@ -134,20 +134,41 @@
 
             <!-- ================= TAB 1: LIVE TRACKER ================= -->
             <section id="view-live" class="space-y-3">
-                <!-- Game Info & Period Selector -->
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 flex items-center gap-2">
-                    <div class="flex-1">
-                        <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Opponent Team</label>
-                        <input type="text" id="liveOpponent" oninput="updateLiveScoreDisplay()" placeholder="e.g., KC Knights" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-oilGold focus:outline-none">
+                <!-- Game Info, Period & Game Strength Selector -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 space-y-2">
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1">
+                            <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Opponent Team</label>
+                            <input type="text" id="liveOpponent" oninput="updateLiveScoreDisplay()" placeholder="e.g., KC Knights" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-oilGold focus:outline-none">
+                        </div>
+                        <div class="w-24">
+                            <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Period</label>
+                            <select id="livePeriod" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-oilGold font-bold focus:border-oilGold focus:outline-none">
+                                <option value="1">1st Period</option>
+                                <option value="2">2nd Period</option>
+                                <option value="3">3rd Period</option>
+                                <option value="OT">Overtime</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="w-24">
-                        <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Period</label>
-                        <select id="livePeriod" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-oilGold font-bold focus:border-oilGold focus:outline-none">
-                            <option value="1">1st Period</option>
-                            <option value="2">2nd Period</option>
-                            <option value="3">3rd Period</option>
-                            <option value="OT">Overtime</option>
-                        </select>
+
+                    <!-- Situation / Strength Selector (EV / PP / SH) -->
+                    <div id="widget-strength" class="pt-1 border-t border-slate-800/80">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[9px] font-bold text-slate-400 uppercase">Play Strength (Auto +/- Rules)</span>
+                            <span id="strengthHint" class="text-[9px] text-oilGold font-semibold">EV: Goal +1 / Opp -1</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1.5">
+                            <button type="button" id="strength-EV" onclick="setStrengthMode('EV')" class="py-1.5 px-2 rounded-lg text-[11px] font-black bg-oilGreen border border-oilGold text-oilGold transition">
+                                Even (EV)
+                            </button>
+                            <button type="button" id="strength-PP" onclick="setStrengthMode('PP')" class="py-1.5 px-2 rounded-lg text-[11px] font-black bg-slate-950 border border-slate-700 text-slate-300 hover:border-slate-500 transition">
+                                Power Play (PP)
+                            </button>
+                            <button type="button" id="strength-SH" onclick="setStrengthMode('SH')" class="py-1.5 px-2 rounded-lg text-[11px] font-black bg-slate-950 border border-slate-700 text-slate-300 hover:border-slate-500 transition">
+                                Shorthanded (SH)
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -161,36 +182,61 @@
                     <div class="text-[11px] text-slate-400 font-semibold mb-2.5">
                         Total Game TOI: <span id="totalGameTOIDisplay" class="text-white font-bold">00:00</span> • Shifts: <span id="shiftCountDisplay" class="text-white font-bold">0</span>
                     </div>
-                    <button id="shiftToggleBtn" onclick="toggleShiftTimer()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-play"></i> Start Shift (On Ice)
-                    </button>
+                    <div class="flex gap-2">
+                        <button id="shiftToggleBtn" onclick="toggleShiftTimer()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-play"></i> Start Shift (On Ice)
+                        </button>
+                        <button id="shiftStoppageBtn" onclick="toggleShiftStoppage()" class="hidden bg-amber-600 hover:bg-amber-500 text-white font-black px-3.5 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-pause"></i> <span>Stoppage</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- On-Ice Strength Selector (Controls Automatic +/-) -->
+                <div id="widget-PM" class="bg-slate-900 border border-slate-800 rounded-xl p-2.5">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">On-Ice Strength (Auto +/-)</span>
+                        <span id="strengthRuleHint" class="text-[9px] font-bold text-oilGold">EV: GF +1 / GA -1</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button type="button" id="strength-EV" onclick="setStrengthMode('EV')" class="bg-oilGreen border border-oilGold text-oilGold font-black py-1.5 rounded-lg text-xs active:scale-95 transition">
+                            Even (EV)
+                        </button>
+                        <button type="button" id="strength-PP" onclick="setStrengthMode('PP')" class="bg-slate-800 border border-slate-700 text-slate-300 font-bold py-1.5 rounded-lg text-xs active:scale-95 transition">
+                            Power Play (PP)
+                        </button>
+                        <button type="button" id="strength-SH" onclick="setStrengthMode('SH')" class="bg-slate-800 border border-slate-700 text-slate-300 font-bold py-1.5 rounded-lg text-xs active:scale-95 transition">
+                            Shorthanded (SH)
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Rapid Entry Stat Buttons -->
                 <div class="grid grid-cols-2 gap-2">
-                    <button id="widget-G" onclick="addLiveStat('G', 1)" class="bg-gradient-to-br from-emerald-600 to-oilGreen hover:from-emerald-500 hover:to-emerald-700 text-white p-3 rounded-xl shadow border-b-2 border-emerald-950 text-left active:scale-95 transition">
+                    <button type="button" id="widget-G" onclick="addLiveStat('G', 1)" class="bg-gradient-to-br from-emerald-600 to-oilGreen hover:from-emerald-500 hover:to-emerald-700 text-white p-3 rounded-xl shadow border-b-2 border-emerald-950 text-left active:scale-95 transition">
                         <div class="flex justify-between items-center">
                             <span class="text-[10px] font-black uppercase text-emerald-200">Goal</span>
                             <i class="fa-solid fa-hockey-puck text-lg opacity-80"></i>
                         </div>
                         <div class="text-2xl font-black mt-1">+1 GOAL</div>
-                        <span class="text-[9px] text-emerald-100 font-semibold block">+1 Goal, +1 Point, +1 SOG</span>
+                        <span id="goalSubLabel" class="text-[9px] text-emerald-100 font-semibold block">+1G, +1 PTS, +1 SOG, +1 +/-</span>
                     </button>
 
-                    <button id="widget-A" onclick="addLiveStat('A', 1)" class="bg-gradient-to-br from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-800 text-white p-3 rounded-xl shadow border-b-2 border-indigo-950 text-left active:scale-95 transition">
+                    <button type="button" id="widget-A" onclick="addLiveStat('A', 1)" class="bg-gradient-to-br from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-800 text-white p-3 rounded-xl shadow border-b-2 border-indigo-950 text-left active:scale-95 transition">
                         <div class="flex justify-between items-center">
                             <span class="text-[10px] font-black uppercase text-blue-200">Assist</span>
                             <i class="fa-solid fa-handshake text-lg opacity-80"></i>
                         </div>
                         <div class="text-2xl font-black mt-1">+1 ASSIST</div>
-                        <span class="text-[9px] text-blue-100 font-semibold block">+1 Assist, +1 Point</span>
+                        <span id="assistSubLabel" class="text-[9px] text-blue-100 font-semibold block">+1A, +1 PTS, +1 +/-</span>
                     </button>
 
                     <!-- Opponent Goal & Score Tracker -->
-                    <button id="widget-OPP_G" onclick="addLiveStat('OPP_G', 1)" class="col-span-2 bg-gradient-to-r from-rose-950 via-slate-900 to-rose-950 hover:from-rose-900 hover:to-rose-900 text-white p-2.5 rounded-xl border border-rose-800/60 active:scale-95 text-left flex justify-between items-center shadow">
+                    <button type="button" id="widget-OPP_G" onclick="addLiveStat('OPP_G', 1)" class="col-span-2 bg-gradient-to-r from-rose-950 via-slate-900 to-rose-950 hover:from-rose-900 hover:to-rose-900 text-white p-2.5 rounded-xl border border-rose-800/60 active:scale-95 text-left flex justify-between items-center shadow">
                         <div>
                             <div class="text-[10px] font-black uppercase text-rose-300">Opponent Scored</div>
                             <div class="text-lg font-black text-rose-400 mt-0.5">+1 OPPONENT GOAL</div>
+                            <span id="oppGoalSubLabel" class="text-[9px] text-rose-200/80 font-semibold block">-1 +/- (if on ice during EV/PP)</span>
                         </div>
                         <div class="bg-rose-900/60 px-3 py-1.5 rounded-lg border border-rose-700/80 text-right">
                             <span class="text-[9px] text-rose-200 font-bold uppercase block">Game Score</span>
@@ -205,12 +251,12 @@
                             <span class="text-[9px] font-bold text-oilGold" id="foPctDisplay">0% FO</span>
                         </div>
                         <div class="grid grid-cols-2 gap-1.5 mt-1">
-                            <button onclick="addLiveStat('FOW', 1)" class="bg-emerald-700 hover:bg-emerald-600 text-white font-black py-1.5 rounded-lg text-xs active:scale-95">+1 FOW</button>
-                            <button onclick="addLiveStat('FOL', 1)" class="bg-rose-800 hover:bg-rose-700 text-white font-black py-1.5 rounded-lg text-xs active:scale-95">+1 FOL</button>
+                            <button type="button" onclick="addLiveStat('FOW', 1)" class="bg-emerald-700 hover:bg-emerald-600 text-white font-black py-1.5 rounded-lg text-xs active:scale-95">+1 FOW</button>
+                            <button type="button" onclick="addLiveStat('FOL', 1)" class="bg-rose-800 hover:bg-rose-700 text-white font-black py-1.5 rounded-lg text-xs active:scale-95">+1 FOL</button>
                         </div>
                     </div>
 
-                    <button id="widget-SOG" onclick="addLiveStat('SOG', 1)" class="bg-slate-800 hover:bg-slate-700 text-white p-2.5 rounded-xl border border-slate-700 active:scale-95 text-left">
+                    <button type="button" id="widget-SOG" onclick="addLiveStat('SOG', 1)" class="bg-slate-800 hover:bg-slate-700 text-white p-2.5 rounded-xl border border-slate-700 active:scale-95 text-left">
                         <div class="text-[10px] font-bold text-slate-400 uppercase">Shot on Goal</div>
                         <div class="text-xl font-black text-white mt-0.5">+1 SOG</div>
                     </button>
@@ -220,19 +266,11 @@
                         <div class="text-xl font-black text-white mt-0.5">+1 BODY CHECK</div>
                     </button>
 
-                    <div id="widget-PM" class="bg-slate-900 p-2 rounded-xl border border-slate-800 flex flex-col justify-between">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase">Plus / Minus</span>
-                        <div class="grid grid-cols-2 gap-1.5 mt-1">
-                            <button onclick="addLiveStat('PM', 1)" class="bg-emerald-700 text-white font-black py-1.5 rounded-lg text-xs active:scale-95">+1</button>
-                            <button onclick="addLiveStat('PM', -1)" class="bg-rose-700 text-white font-black py-1.5 rounded-lg text-xs active:scale-95">-1</button>
-                        </div>
-                    </div>
-
-                    <div id="widget-PIM" class="bg-slate-900 p-2 rounded-xl border border-slate-800 flex flex-col justify-between">
+                    <div id="widget-PIM" class="col-span-2 bg-slate-900 p-2 rounded-xl border border-slate-800 flex flex-col justify-between">
                         <span class="text-[10px] font-bold text-slate-400 uppercase">Penalty (PIM)</span>
                         <div class="grid grid-cols-2 gap-1.5 mt-1">
-                            <button onclick="addLiveStat('PIM', 2)" class="bg-amber-700 text-white font-bold py-1.5 rounded-lg text-[10px] active:scale-95">+2 Min</button>
-                            <button onclick="addLiveStat('PIM', 4)" class="bg-rose-800 text-white font-bold py-1.5 rounded-lg text-[10px] active:scale-95">+4 Min</button>
+                            <button type="button" onclick="addLiveStat('PIM', 2)" class="bg-amber-700 text-white font-bold py-1.5 rounded-lg text-[10px] active:scale-95">+2 Min</button>
+                            <button type="button" onclick="addLiveStat('PIM', 4)" class="bg-rose-800 text-white font-bold py-1.5 rounded-lg text-[10px] active:scale-95">+4 Min</button>
                         </div>
                     </div>
                 </div>
@@ -241,7 +279,7 @@
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5">
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-[10px] font-black text-slate-400 uppercase">Current Game Line</span>
-                        <button onclick="undoLastLiveAction()" class="text-[10px] text-amber-400 hover:underline font-bold">
+                        <button type="button" onclick="undoLastLiveAction()" class="text-[10px] text-amber-400 hover:underline font-bold">
                             <i class="fa-solid fa-rotate-left"></i> Undo Last
                         </button>
                     </div>
@@ -260,7 +298,7 @@
                 </div>
 
                 <!-- Finish & Save Game Button -->
-                <button onclick="confirmFinishGame()" class="w-full bg-oilGreen hover:bg-emerald-800 border border-oilGold text-oilGold font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg active:scale-95 transition">
+                <button type="button" onclick="confirmFinishGame()" class="w-full bg-oilGreen hover:bg-emerald-800 border border-oilGold text-oilGold font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg active:scale-95 transition">
                     <i class="fa-solid fa-floppy-disk mr-1"></i> Finish & Save Game to Season Log
                 </button>
             </section>
@@ -269,7 +307,7 @@
             <section id="view-history" class="hidden space-y-2.5">
                 <div class="flex justify-between items-center">
                     <h2 class="text-xs font-black uppercase text-slate-300 tracking-wider">Season Game Log</h2>
-                    <button onclick="openAddPastGameModal()" class="text-[11px] bg-oilGreen text-oilGold px-2.5 py-1 rounded-lg font-bold border border-oilGold/40">
+                    <button type="button" onclick="openAddPastGameModal()" class="text-[11px] bg-oilGreen text-oilGold px-2.5 py-1 rounded-lg font-bold border border-oilGold/40">
                         + Add Past Game
                     </button>
                 </div>
@@ -337,9 +375,9 @@
                     <p class="text-[11px] text-slate-400">Tap a button below to open your Pixel Messages app pre-filled with your son's game stats.</p>
 
                     <div class="grid grid-cols-3 gap-1.5">
-                        <button onclick="prepareSMS('End of 1st Period')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold py-2 rounded-lg text-[11px]">End of P1</button>
-                        <button onclick="prepareSMS('End of 2nd Period')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold py-2 rounded-lg text-[11px]">End of P2</button>
-                        <button onclick="prepareSMS('FINAL Game Recap')" class="bg-oilGreen hover:bg-emerald-800 border border-oilGold/50 text-oilGold font-black py-2 rounded-lg text-[11px]">FINAL</button>
+                        <button type="button" onclick="prepareSMS('End of 1st Period')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold py-2 rounded-lg text-[11px]">End of P1</button>
+                        <button type="button" onclick="prepareSMS('End of 2nd Period')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold py-2 rounded-lg text-[11px]">End of P2</button>
+                        <button type="button" onclick="prepareSMS('FINAL Game Recap')" class="bg-oilGreen hover:bg-emerald-800 border border-oilGold/50 text-oilGold font-black py-2 rounded-lg text-[11px]">FINAL</button>
                     </div>
 
                     <div>
@@ -347,7 +385,7 @@
                         <textarea id="smsPreviewBox" rows="7" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:border-oilGold focus:outline-none"></textarea>
                     </div>
 
-                    <button onclick="launchPixelSMS()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow flex items-center justify-center gap-2 active:scale-95">
+                    <button type="button" onclick="launchPixelSMS()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow flex items-center justify-center gap-2 active:scale-95">
                         <i class="fa-solid fa-paper-plane"></i> Open in Messages App
                     </button>
                 </div>
@@ -360,7 +398,7 @@
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-4 space-y-3 text-left max-h-[90dvh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                 <h3 class="font-black text-white text-sm uppercase">Edit Player Info & Photo</h3>
-                <button onclick="toggleEditProfileModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button type="button" onclick="toggleEditProfileModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
             <!-- Headshot Upload from Phone -->
@@ -422,8 +460,8 @@
             </div>
 
             <div class="flex gap-2 pt-2">
-                <button onclick="toggleEditProfileModal()" class="w-1/2 bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">Cancel</button>
-                <button onclick="savePlayerProfile()" class="w-1/2 bg-oilGreen text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40">Save Profile</button>
+                <button type="button" onclick="toggleEditProfileModal()" class="w-1/2 bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">Cancel</button>
+                <button type="button" onclick="savePlayerProfile()" class="w-1/2 bg-oilGreen text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40">Save Profile</button>
             </div>
         </div>
     </div>
@@ -436,7 +474,7 @@
                     <h3 class="font-black text-white text-sm uppercase">Stat & Button Settings</h3>
                     <p class="text-[10px] text-slate-400">Select which buttons appear on your Live Tracker</p>
                 </div>
-                <button onclick="toggleButtonSettingsModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button type="button" onclick="toggleButtonSettingsModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
             <div id="buttonSettingsChecklist" class="space-y-1.5 overflow-y-auto pr-1 flex-1">
@@ -444,8 +482,8 @@
             </div>
 
             <div class="flex gap-2 pt-2 border-t border-slate-800 shrink-0">
-                <button onclick="toggleButtonSettingsModal()" class="w-1/2 bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">Cancel</button>
-                <button onclick="saveButtonSettings()" class="w-1/2 bg-oilGreen text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40">Save Settings</button>
+                <button type="button" onclick="toggleButtonSettingsModal()" class="w-1/2 bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">Cancel</button>
+                <button type="button" onclick="saveButtonSettings()" class="w-1/2 bg-oilGreen text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40">Save Settings</button>
             </div>
         </div>
     </div>
@@ -455,7 +493,7 @@
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-4 space-y-2.5 text-left max-h-[90dvh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                 <h3 id="gameModalTitle" class="font-black text-white text-sm uppercase">Add Past Game</h3>
-                <button onclick="closeGameEditorModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button type="button" onclick="closeGameEditorModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <input type="hidden" id="editingGameId">
 
@@ -528,8 +566,8 @@
             </div>
 
             <div class="flex gap-2 pt-2">
-                <button onclick="closeGameEditorModal()" class="w-1/2 bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">Cancel</button>
-                <button onclick="saveEditedGame()" class="w-1/2 bg-oilGreen text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40">Save Game</button>
+                <button type="button" onclick="closeGameEditorModal()" class="w-1/2 bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">Cancel</button>
+                <button type="button" onclick="saveEditedGame()" class="w-1/2 bg-oilGreen text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40">Save Game</button>
             </div>
         </div>
     </div>
@@ -540,8 +578,8 @@
             <h4 id="dialogTitle" class="text-sm font-black text-white uppercase">Confirm Action</h4>
             <p id="dialogMessage" class="text-xs text-slate-300 leading-relaxed"></p>
             <div class="flex gap-2 pt-1">
-                <button id="dialogCancelBtn" onclick="closeCustomDialog()" class="w-1/2 bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">Cancel</button>
-                <button id="dialogConfirmBtn" class="w-1/2 bg-oilGreen text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40">Confirm</button>
+                <button type="button" id="dialogCancelBtn" onclick="closeCustomDialog()" class="w-1/2 bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">Cancel</button>
+                <button type="button" id="dialogConfirmBtn" class="w-1/2 bg-oilGreen text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40">Confirm</button>
             </div>
         </div>
     </div>
@@ -676,26 +714,27 @@
         };
 
         const BUTTON_CATALOG = [
-            { key: 'shiftTimer', label: 'Shift Timer (TOI)', desc: 'Track on-ice shift & total game time' },
-            { key: 'G', label: '+1 Goal', desc: 'Logs Goal, Point, Shot on Goal & team score' },
-            { key: 'A', label: '+1 Assist', desc: 'Logs Assist & Point' },
-            { key: 'OPP_G', label: '+1 Opponent Goal', desc: 'Updates opponent score line' },
+            { key: 'shiftTimer', label: 'Shift Timer (TOI & Stoppage)', desc: 'Track shifts, whistle stoppages & total game TOI' },
+            { key: 'strength', label: 'Strength Selector (EV / PP / SH)', desc: 'Switch play strength for automatic +/- rules' },
+            { key: 'G', label: '+1 Goal', desc: 'Logs Goal, Point, Shot on Goal & auto +/-' },
+            { key: 'A', label: '+1 Assist', desc: 'Logs Assist, Point & auto +/-' },
+            { key: 'OPP_G', label: '+1 Opponent Goal', desc: 'Updates opponent score & auto +/-' },
             { key: 'FO', label: 'Faceoffs (+1 FOW / +1 FOL)', desc: 'Track faceoff wins, losses & win %' },
             { key: 'SOG', label: '+1 Shot on Goal (SOG)', desc: 'Track shots on net' },
             { key: 'HIT', label: '+1 Body Check', desc: 'Track physical body checks (for contact leagues)' },
-            { key: 'PM', label: 'Plus / Minus (+1 / -1)', desc: 'Track on-ice goal differential' },
+            { key: 'PM', label: 'Strength & Auto +/- (EV/PP/SH)', desc: 'Auto-awards +/- based on strength & goals/assists' },
             { key: 'PIM', label: 'Penalty Minutes (+2 / +4 Min)', desc: 'Track penalty minutes' }
         ];
 
         const DEFAULT_BUTTON_SETTINGS = {
             shiftTimer: true,
+            strength: true,
             G: true,
             A: true,
             OPP_G: true,
             FO: true,
             SOG: true,
             HIT: false, // Disabled by default for non-contact leagues
-            PM: true,
             PIM: true
         };
 
@@ -743,6 +782,7 @@
         window.savedGames = [];
         window.liveEventLog = [];
         window.pendingAvatarDataUrl = "";
+        window.strengthMode = "EV"; // "EV", "PP", or "SH"
 
         window.currentGame = {
             teamGoals: 0,
@@ -761,18 +801,21 @@
         // Shift Timer Variables
         let shiftInterval = null;
         let isShiftActive = false;
+        let isShiftStopped = false;
         let currentShiftSeconds = 0;
         let shiftCount = 0;
-
+        let currentStrength = 'EV';
         window.onload = function() {
             loadFromStorage();
             populateSampleDataIfEmpty();
+            setStrengthMode(window.strengthMode);
             applyButtonSettings();
             updatePlayerHeaderDisplay();
             updateStatsSummary();
             renderHistoryList();
             renderStatsTables();
             updateLiveScoreDisplay();
+            syncShiftTimerUI();
         };
 
         // Tab Navigation
@@ -858,36 +901,158 @@
             });
         };
 
+        // Strength Mode (EV / PP / SH) & Plus/Minus Rules
+        function setStrengthMode(mode) {
+            window.strengthMode = ['EV', 'PP', 'SH'].includes(mode) ? mode : 'EV';
+
+            ['EV', 'PP', 'SH'].forEach(m => {
+                const btn = document.getElementById(`strength-${m}`);
+                if (!btn) return;
+                if (m === window.strengthMode) {
+                    btn.className = "py-1.5 px-2 rounded-lg text-[11px] font-black bg-oilGreen border border-oilGold text-oilGold transition";
+                } else {
+                    btn.className = "py-1.5 px-2 rounded-lg text-[11px] font-black bg-slate-950 border border-slate-700 text-slate-300 hover:border-slate-500 transition";
+                }
+            });
+
+            const hintEl = document.getElementById('strengthHint');
+            const goalSub = document.getElementById('goalSubLabel');
+            const assistSub = document.getElementById('assistSubLabel');
+            const oppSub = document.getElementById('oppGoalSubLabel');
+
+            if (window.strengthMode === 'EV') {
+                hintEl.textContent = "EV: Goal/A +1 +/- | Opp -1 +/-";
+                goalSub.textContent = "+1G, +1 PTS, +1 SOG, +1 +/-";
+                assistSub.textContent = "+1A, +1 PTS, +1 +/-";
+                oppSub.textContent = "-1 +/- (when on ice)";
+            } else if (window.strengthMode === 'PP') {
+                hintEl.textContent = "PP: Goal/A 0 +/- | SH Goal Against -1 +/-";
+                goalSub.textContent = "+1G, +1 PTS, +1 SOG, 0 +/- (PP)";
+                assistSub.textContent = "+1A, +1 PTS, 0 +/- (PP)";
+                oppSub.textContent = "-1 +/- (shorthanded goal against)";
+            } else {
+                hintEl.textContent = "SH: SH Goal/A +1 +/- | Goal Against 0 +/-";
+                goalSub.textContent = "+1G, +1 PTS, +1 SOG, +1 +/- (SH)";
+                assistSub.textContent = "+1A, +1 PTS, +1 +/- (SH)";
+                oppSub.textContent = "0 +/- (no -1 on penalty kill)";
         // Shift Timer Controls
-        function toggleShiftTimer() {
+        function syncShiftTimerUI() {
             const btn = document.getElementById('shiftToggleBtn');
+            const stoppageBtn = document.getElementById('shiftStoppageBtn');
             const status = document.getElementById('shiftStatus');
 
             if (!isShiftActive) {
-                isShiftActive = true;
-                shiftCount++;
-                document.getElementById('shiftCountDisplay').textContent = shiftCount;
-                status.textContent = "ON ICE";
-                status.className = "bg-emerald-600 px-2 py-0.5 rounded text-white font-black";
-                btn.innerHTML = '<i class="fa-solid fa-stop"></i> End Shift (Off Ice)';
-                btn.className = "w-full bg-rose-600 hover:bg-rose-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-2";
-
-                shiftInterval = setInterval(() => {
-                    currentShiftSeconds++;
-                    window.currentGame.TOISeconds++;
-                    document.getElementById('shiftClockDisplay').textContent = formatMMSS(currentShiftSeconds);
-                    document.getElementById('totalGameTOIDisplay').textContent = formatMMSS(window.currentGame.TOISeconds);
-                }, 1000);
-            } else {
-                isShiftActive = false;
-                clearInterval(shiftInterval);
-                currentShiftSeconds = 0;
-                document.getElementById('shiftClockDisplay').textContent = "00:00";
+                isShiftStopped = false;
                 status.textContent = "OFF ICE";
                 status.className = "bg-slate-800 px-2 py-0.5 rounded text-slate-300";
                 btn.innerHTML = '<i class="fa-solid fa-play"></i> Start Shift (On Ice)';
-                btn.className = "w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-2";
+                btn.className = "flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-2";
+                stoppageBtn.classList.add('hidden');
+                stoppageBtn.innerHTML = '<i class="fa-solid fa-pause"></i> <span>Stoppage</span>';
+                stoppageBtn.className = "hidden bg-amber-600 hover:bg-amber-500 text-white font-black px-3.5 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-1.5";
+                return;
             }
+
+            stoppageBtn.classList.remove('hidden');
+            btn.innerHTML = '<i class="fa-solid fa-stop"></i> End Shift (Off Ice)';
+            btn.className = "flex-1 bg-rose-600 hover:bg-rose-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-2";
+
+            if (isShiftStopped) {
+                status.textContent = "STOPPAGE (ON ICE)";
+                status.className = "bg-amber-600 px-2 py-0.5 rounded text-white font-black";
+                stoppageBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Resume</span>';
+                stoppageBtn.className = "bg-emerald-600 hover:bg-emerald-500 text-white font-black px-3.5 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-1.5";
+            } else {
+                status.textContent = "ON ICE";
+                status.className = "bg-emerald-600 px-2 py-0.5 rounded text-white font-black";
+                stoppageBtn.innerHTML = '<i class="fa-solid fa-pause"></i> <span>Stoppage</span>';
+                stoppageBtn.className = "bg-amber-600 hover:bg-amber-500 text-white font-black px-3.5 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-1.5";
+            }
+        }
+
+        function startShiftClockInterval() {
+            clearInterval(shiftInterval);
+            shiftInterval = setInterval(() => {
+                if (!isShiftActive || isShiftStopped) return;
+                currentShiftSeconds++;
+                window.currentGame.TOISeconds++;
+                document.getElementById('shiftClockDisplay').textContent = formatMMSS(currentShiftSeconds);
+                document.getElementById('totalGameTOIDisplay').textContent = formatMMSS(window.currentGame.TOISeconds);
+            }, 1000);
+        }
+
+        function toggleShiftTimer() {
+            if (!isShiftActive) {
+                isShiftActive = true;
+                isShiftStopped = false;
+                shiftCount++;
+                document.getElementById('shiftCountDisplay').textContent = shiftCount;
+                syncShiftTimerUI();
+                startShiftClockInterval();
+            } else {
+                isShiftActive = false;
+                isShiftStopped = false;
+                clearInterval(shiftInterval);
+                currentShiftSeconds = 0;
+                document.getElementById('shiftClockDisplay').textContent = "00:00";
+                syncShiftTimerUI();
+            }
+        }
+
+        function toggleShiftStoppage() {
+            if (!isShiftActive) return;
+            isShiftStopped = !isShiftStopped;
+            syncShiftTimerUI();
+        }
+
+        function pauseShiftForStoppage() {
+            if (isShiftActive && !isShiftStopped) {
+                isShiftStopped = true;
+                syncShiftTimerUI();
+                return true;
+            }
+            return false;
+        }
+
+        function setStrengthMode(mode) {
+            currentStrength = mode;
+            const modes = ['EV', 'PP', 'SH'];
+            modes.forEach(m => {
+                const btn = document.getElementById(`strength-${m}`);
+                if (!btn) return;
+                if (m === mode) {
+                    btn.className = "bg-oilGreen border border-oilGold text-oilGold font-black py-1.5 rounded-lg text-xs active:scale-95 transition";
+                } else {
+                    btn.className = "bg-slate-800 border border-slate-700 text-slate-300 font-bold py-1.5 rounded-lg text-xs active:scale-95 transition";
+                }
+            });
+
+            const hint = document.getElementById('strengthRuleHint');
+            if (hint) {
+                if (mode === 'EV') hint.textContent = "EV: GF +1 / GA -1";
+                else if (mode === 'PP') hint.textContent = "PP: GF 0 / SHG Against -1";
+                else hint.textContent = "SH: SHG For +1 / GA 0";
+            }
+        }
+
+        function calculateAutoPlusMinus(statType, strength) {
+            // Only track +/- when the strength/PM widget is enabled
+            if (!window.buttonSettings || !window.buttonSettings.PM) return 0;
+
+            const isGoalFor = statType === 'G' || statType === 'A';
+            const isGoalAgainst = statType === 'OPP_G';
+            if (!isGoalFor && !isGoalAgainst) return 0;
+
+            if (strength === 'EV') {
+                return isGoalFor ? 1 : -1;
+            } else if (strength === 'PP') {
+                // Power play: no +1 awarded for PP goal for, -1 if scored against shorthanded
+                return isGoalAgainst ? -1 : 0;
+            } else if (strength === 'SH') {
+                // Shorthanded: +1 if shorthanded goal scored for, 0 if scored against while killing penalty
+                return isGoalFor ? 1 : 0;
+            }
+            return 0;
         }
 
         function formatMMSS(secs) {
@@ -899,19 +1064,35 @@
         // Live Stat Recording
         function addLiveStat(statType, amount) {
             const period = document.getElementById('livePeriod').value;
-            window.liveEventLog.push({ statType, amount, period });
+            let autoPausedShift = false;
+            let pmDelta = 0;
 
             if (statType === 'G') {
                 window.currentGame.G += amount;
                 window.currentGame.SOG += amount;
                 window.currentGame.teamGoals += amount;
-                addLiveEventFeed(`GOAL scored! (P${period})`);
+                pmDelta = calculateAutoPlusMinus('G', currentStrength) * amount;
+                window.currentGame.PM += pmDelta;
+                autoPausedShift = pauseShiftForStoppage();
+                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${currentStrength})`;
+                const pauseTag = autoPausedShift ? ' • Clock Paused' : '';
+                addLiveEventFeed(`GOAL [${currentStrength}] scored! (P${period})${pmTag}${pauseTag}`);
             } else if (statType === 'A') {
                 window.currentGame.A += amount;
-                addLiveEventFeed(`Assist recorded (P${period})`);
+                pmDelta = calculateAutoPlusMinus('A', currentStrength) * amount;
+                window.currentGame.PM += pmDelta;
+                autoPausedShift = pauseShiftForStoppage();
+                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${currentStrength})`;
+                const pauseTag = autoPausedShift ? ' • Clock Paused' : '';
+                addLiveEventFeed(`Assist [${currentStrength}] recorded (P${period})${pmTag}${pauseTag}`);
             } else if (statType === 'OPP_G') {
                 window.currentGame.oppGoals += amount;
-                addLiveEventFeed(`Opponent goal (P${period})`);
+                pmDelta = calculateAutoPlusMinus('OPP_G', currentStrength) * amount;
+                window.currentGame.PM += pmDelta;
+                autoPausedShift = pauseShiftForStoppage();
+                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${currentStrength})`;
+                const pauseTag = autoPausedShift ? ' • Clock Paused' : '';
+                addLiveEventFeed(`Opponent goal [${currentStrength}] (P${period})${pmTag}${pauseTag}`);
             } else if (statType === 'FOW') {
                 window.currentGame.FOW += amount;
                 addLiveEventFeed(`Faceoff Won (P${period})`);
@@ -924,13 +1105,12 @@
             } else if (statType === 'HIT') {
                 window.currentGame.HIT += amount;
                 addLiveEventFeed(`Body Check (P${period})`);
-            } else if (statType === 'PM') {
-                window.currentGame.PM += amount;
-                addLiveEventFeed(`Plus/Minus ${amount > 0 ? '+1' : '-1'} (P${period})`);
             } else if (statType === 'PIM') {
                 window.currentGame.PIM += amount;
                 addLiveEventFeed(`Penalty +${amount} PIM (P${period})`);
             }
+
+            window.liveEventLog.push({ statType, amount, period, pmDelta, autoPausedShift });
 
             refreshLiveBoxScore();
             updateLiveScoreDisplay();
@@ -939,7 +1119,7 @@
         function undoLastLiveAction() {
             if (window.liveEventLog.length === 0) return;
             const last = window.liveEventLog.pop();
-            const { statType, amount } = last;
+            const { statType, amount, pmDelta = 0, autoPausedShift = false } = last;
 
             if (statType === 'G') {
                 window.currentGame.G = Math.max(0, window.currentGame.G - amount);
@@ -957,10 +1137,17 @@
                 window.currentGame.SOG = Math.max(0, window.currentGame.SOG - amount);
             } else if (statType === 'HIT') {
                 window.currentGame.HIT = Math.max(0, window.currentGame.HIT - amount);
-            } else if (statType === 'PM') {
-                window.currentGame.PM -= amount;
             } else if (statType === 'PIM') {
                 window.currentGame.PIM = Math.max(0, window.currentGame.PIM - amount);
+            }
+
+            if (pmDelta !== 0) {
+                window.currentGame.PM -= pmDelta;
+            }
+
+            if (autoPausedShift && isShiftActive && isShiftStopped) {
+                isShiftStopped = false;
+                syncShiftTimerUI();
             }
 
             refreshLiveBoxScore();
@@ -1005,7 +1192,7 @@
                 "Finish & Save Game",
                 `Save final game vs ${opp} (${g.G}G, ${g.A}A, ${g.G + g.A} PTS) to the season log?`,
                 () => {
-                    if (isShiftActive) toggleShiftTimer();
+                    if (isShiftOnIce) endCurrentShift();
                     const resPrefix = g.teamGoals > g.oppGoals ? "W" : (g.teamGoals < g.oppGoals ? "L" : "T");
                     const newGame = window.normalizeGameRecord({
                         id: 'g_' + Date.now(),
@@ -1031,6 +1218,7 @@
                     // Reset Live Tracker
                     window.currentGame = { teamGoals: 0, oppGoals: 0, G: 0, A: 0, SOG: 0, FOW: 0, FOL: 0, HIT: 0, PM: 0, PIM: 0, TOISeconds: 0 };
                     window.liveEventLog = [];
+                    setStrengthMode('EV');
                     shiftCount = 0;
                     document.getElementById('shiftCountDisplay').textContent = "0";
                     document.getElementById('totalGameTOIDisplay').textContent = "00:00";
@@ -1264,8 +1452,8 @@
                                 <span class="text-[10px] text-slate-400 block mt-0.5">${g.date} • ${g.season} • TOI ${formatMMSS(g.TOISeconds)}</span>
                             </div>
                             <div class="flex gap-1.5">
-                                <button onclick="openEditGameModal('${g.id}')" class="text-xs bg-slate-800 hover:bg-slate-700 text-oilGold p-1.5 rounded-lg border border-slate-700"><i class="fa-solid fa-pen"></i></button>
-                                <button onclick="deleteGame('${g.id}')" class="text-xs bg-slate-800 hover:bg-rose-900 text-rose-400 p-1.5 rounded-lg border border-slate-700"><i class="fa-solid fa-trash"></i></button>
+                                <button type="button" onclick="openEditGameModal('${g.id}')" class="text-xs bg-slate-800 hover:bg-slate-700 text-oilGold p-1.5 rounded-lg border border-slate-700"><i class="fa-solid fa-pen"></i></button>
+                                <button type="button" onclick="deleteGame('${g.id}')" class="text-xs bg-slate-800 hover:bg-rose-900 text-rose-400 p-1.5 rounded-lg border border-slate-700"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
                         <div class="grid grid-cols-6 gap-1 text-center bg-slate-950 rounded-lg py-1.5 border border-slate-800/80 text-[10px]">
@@ -1344,7 +1532,7 @@
             if (window.buttonSettings.SOG) lines.push(`• ${g.SOG} Shots on Goal`);
             if (window.buttonSettings.FO) lines.push(`• Faceoffs: ${foStr}`);
             if (window.buttonSettings.HIT) lines.push(`• Body Checks: ${g.HIT}`);
-            if (window.buttonSettings.PM) lines.push(`• Plus/Minus: ${g.PM > 0 ? '+' + g.PM : g.PM}`);
+            if (window.buttonSettings.strength) lines.push(`• Plus/Minus: ${g.PM > 0 ? '+' + g.PM : g.PM}`);
             if (window.buttonSettings.shiftTimer) lines.push(`• Ice Time: ${formatMMSS(g.TOISeconds)}`);
 
             document.getElementById('smsPreviewBox').value = lines.join('\n');
