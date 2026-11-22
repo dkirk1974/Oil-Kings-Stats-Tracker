@@ -32,9 +32,10 @@
         }
     </script>
     <style>
-        /* Android Pixel Phone Shell Styling */
+        /* Native Mobile Web App Styling */
         body {
             background-color: #090d16;
+            overscroll-behavior-y: none;
         }
         
         ::-webkit-scrollbar {
@@ -55,69 +56,48 @@
             background-size: 20px 20px;
         }
 
+        /* Full screen on real phones, centered device frame only on wide desktop screens */
         .pixel-frame {
-            max-width: 440px;
+            width: 100%;
+            max-width: 480px;
             margin: 0 auto;
-            border-radius: 44px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 12px #1e293b, 0 0 0 14px #0f172a;
-            overflow: hidden;
             background: #0f172a;
-            min-height: 92vh;
+            min-height: 100dvh;
         }
 
-        /* Android Camera Punch Hole */
-        .pixel-camera {
-            width: 14px;
-            height: 14px;
-            background-color: #000;
-            border-radius: 50%;
-            margin: 0 auto;
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 60;
-            border: 1px solid #334155;
+        @media (min-width: 640px) {
+            .pixel-frame {
+                border-radius: 40px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 10px #1e293b;
+                overflow: hidden;
+                min-height: 860px;
+            }
         }
     </style>
 </head>
-<body class="text-slate-100 font-sans antialiased selection:bg-oilGold selection:text-black py-0 sm:py-6">
+<body class="text-slate-100 font-sans antialiased selection:bg-oilGold selection:text-black m-0 p-0 sm:py-6">
 
-    <!-- Google Pixel Native Frame Container -->
-    <div class="pixel-frame relative flex flex-col min-h-screen sm:min-h-[880px]">
-        
-        <!-- Android Camera Hole Punch -->
-        <div class="pixel-camera"></div>
+    <!-- App Container -->
+    <div class="pixel-frame relative flex flex-col">
 
-        <!-- Android Status Bar -->
-        <div class="bg-slate-950 text-slate-400 text-[11px] font-semibold px-6 pt-3 pb-1 flex justify-between items-center z-50">
-            <span>6:41 PM</span>
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-wifi text-[10px]"></i>
-                <i class="fa-solid fa-signal text-[10px]"></i>
-                <i class="fa-solid fa-battery-full text-xs text-emerald-400"></i>
-            </div>
-        </div>
-
-        <!-- Android App Bar Header (NHL Oil Kings Theme) -->
-        <header class="nhl-pattern text-white border-b-2 border-oilGold shadow-lg relative">
-            <div class="px-4 pt-3 pb-2 flex items-center justify-between border-b border-slate-800">
+        <!-- App Bar Header (NHL Oil Kings Theme) -->
+        <header class="nhl-pattern text-white border-b-2 border-oilGold shadow-lg relative shrink-0">
+            <div class="px-4 py-2.5 flex items-center justify-between border-b border-slate-800/80">
                 <div class="flex items-center gap-2.5">
                     <div class="w-7 h-7 rounded-lg bg-oilGreen border border-oilGold flex items-center justify-center font-black text-oilGold text-xs shadow">
                         OK
                     </div>
-                    <div class="text-[9px] text-slate-400 font-semibold flex items-center gap-1.5">
-                        <span>Pixel Stat Tracker</span>
-                        <span id="cloudSyncBadge" class="text-[9px] font-bold text-slate-500">• Offline Ready</span>
+                    <div class="text-[10px] text-slate-300 font-semibold flex items-center gap-1.5">
+                        <span>SWZ Stat Tracker</span>
+                        <span id="cloudSyncBadge" class="text-[9px] font-bold text-slate-400">• Local Mode</span>
                     </div>
                 </div>
-            </div>
-            
-            <div class="flex items-center gap-1.5">
-                    <button onclick="openAddPastGameModal()" class="text-xs bg-oilGreen/90 hover:bg-oilGreen border border-oilGold/40 text-oilGold font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow">
+                
+                <div class="flex items-center gap-1.5">
+                    <button onclick="openAddPastGameModal()" class="text-xs bg-oilGreen/90 hover:bg-oilGreen border border-oilGold/40 text-oilGold font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow active:scale-95">
                         <i class="fa-solid fa-plus text-[10px]"></i> Past Game
                     </button>
-                    <button onclick="toggleEditProfileModal()" class="text-xs bg-slate-800 text-slate-300 p-1.5 rounded-lg border border-slate-700">
+                    <button onclick="toggleEditProfileModal()" title="Edit Player & Photo" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700 active:scale-95">
                         <i class="fa-solid fa-user-pen text-oilGold"></i>
                     </button>
                 </div>
@@ -464,9 +444,13 @@
                     <input type="text" id="modalDate" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs font-bold text-white">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">TOI (Minutes)</label>
-                    <input type="number" id="modalTOIMins" placeholder="e.g. 18" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs font-bold text-white">
-                </div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Player Headshot (From Phone Gallery)</label>
+                <label class="w-full bg-slate-800 hover:bg-slate-700 border border-dashed border-oilGold/60 text-oilGold font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer transition">
+                    <i class="fa-solid fa-camera"></i>
+                    <span id="photoUploadLabel">Choose Photo from Pixel</span>
+                    <input type="file" id="editPhotoFile" accept="image/*" onchange="handlePhotoFileSelect(event)" class="hidden">
+                </label>
+                <input type="hidden" id="editPhotoUrl">
             </div>
 
             <div class="flex gap-2 pt-2">
@@ -1093,10 +1077,52 @@
                 document.getElementById('editPosition').value = window.playerProfile.position;
                 document.getElementById('editShoots').value = window.playerProfile.shoots;
                 document.getElementById('editPhotoUrl').value = window.playerProfile.photoUrl;
+                document.getElementById('photoUploadLabel').innerText = "Choose Photo from Pixel";
                 modal.classList.remove('hidden');
             } else {
                 modal.classList.add('hidden');
             }
+        }
+
+        // Compress and store photo selected directly from Pixel Gallery
+        function handlePhotoFileSelect(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('photoUploadLabel').innerText = "Processing photo...";
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxSize = 240;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxSize) {
+                            height = Math.round((height * maxSize) / width);
+                            width = maxSize;
+                        }
+                    } else {
+                        if (height > maxSize) {
+                            width = Math.round((width * maxSize) / height);
+                            height = maxSize;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+                    document.getElementById('editPhotoUrl').value = compressedDataUrl;
+                    document.getElementById('photoUploadLabel').innerText = "Photo Ready! Tap Save Profile";
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
         function savePlayerProfile() {
