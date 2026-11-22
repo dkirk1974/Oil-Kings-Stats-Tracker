@@ -1514,6 +1514,7 @@
                 addLiveEventFeed(`${typeLabel} scored! (P${period})${pmTag}${pauseTag}`);
             } else if (statType === 'A') {
                 window.currentGame.A += amount;
+                window.currentGame.teamGoals += amount;
                 if (activeStrength === 'PP') {
                     specialTag = 'PPA';
                     window.currentGame.PPA += amount;
@@ -1589,6 +1590,7 @@
                 }
             } else if (statType === 'A') {
                 window.currentGame.A = Math.max(0, window.currentGame.A - amount);
+                window.currentGame.teamGoals = Math.max(0, window.currentGame.teamGoals - amount);
                 if (specialTag && window.currentGame[specialTag] !== undefined) {
                     window.currentGame[specialTag] = Math.max(0, window.currentGame[specialTag] - amount);
                 }
@@ -1723,15 +1725,17 @@
                     renderStatsTables();
                     switchTab('history');
 
-                    showCustomDialog(
-                        "Send Post-Game Recap?",
-                        `Game saved vs ${completedGameSnapshot.opponent}. Would you like to send the post-game SMS recap now?`,
-                        () => {
-                            switchTab('sms');
-                            preparePostGameSMS(completedGameSnapshot);
-                            launchPixelSMS();
-                        }
-                    );
+                    setTimeout(() => {
+                        showCustomDialog(
+                            "Send Post-Game SMS Recap?",
+                            `Game saved (${completedGameSnapshot.result} vs ${completedGameSnapshot.opponent}). Would you like to share the game summary via SMS?`,
+                            () => {
+                                switchTab('sms');
+                                preparePostGameSMS(completedGameSnapshot);
+                                launchPixelSMS();
+                            }
+                        );
+                    }, 50);
                 }
             );
         }
