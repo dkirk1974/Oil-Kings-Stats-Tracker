@@ -704,7 +704,7 @@
     <!-- FIREBASE CLOUD SYNC MODULE (Ready when MANUAL_FIREBASE_CONFIG is added) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Paste your Firebase config object here when ready to link to Cloud Firestore
@@ -714,7 +714,7 @@
             isReady: false,
             db: null,
             user: null,
-            appId: 'swz-oil-kings-tracker',
+            appId: typeof __app_id !== 'undefined' && __app_id ? String(__app_id) : 'swz-oil-kings-tracker',
 
             updateBadge(text, colorClass) {
                 const badge = document.getElementById('cloudSyncBadge');
@@ -728,7 +728,7 @@
                 return doc(this.db, 'artifacts', this.appId, 'public', 'data', 'hockeyTracker', 'sharedState');
             },
 
-            init() {
+            async init() {
                 try {
                     const config = MANUAL_FIREBASE_CONFIG || (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null);
                     if (!config) {
@@ -736,24 +736,29 @@
                         return;
                     }
 
+                    this.updateBadge("Connecting...", "text-oilGold");
                     const app = initializeApp(config);
                     const auth = getAuth(app);
                     this.db = getFirestore(app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
 
                     onAuthStateChanged(auth, (user) => {
                         if (user) {
                             this.user = user;
                             this.isReady = true;
                             this.listenToCloud();
+                        } else {
+                            this.isReady = false;
+                            this.updateBadge("Local Mode", "text-amber-400");
                         }
                     });
-
-                    signInAnonymously(auth).catch((err) => {
-                        console.warn("Firebase auth skipped:", err);
-                        this.updateBadge("Local Mode", "text-amber-400");
-                    });
                 } catch (err) {
-                    console.warn("Firebase init skipped:", err);
+                    console.warn("Cloud sync init skipped:", err);
                     this.updateBadge("Local Mode", "text-amber-400");
                 }
             },
@@ -763,6 +768,7 @@
                 const stateDocRef = this.getSharedDocRef();
 
                 onSnapshot(stateDocRef, (snap) => {
+                    if (!this.user) return;
                     if (snap.exists()) {
                         const cloudData = snap.data();
                         if (cloudData.playerProfile) {
@@ -784,11 +790,11 @@
                             localStorage.setItem('swz_seasonOverrides', JSON.stringify(window.seasonOverrides));
                         } catch (e) {}
 
-                        window.applyButtonSettings();
-                        window.updatePlayerHeaderDisplay();
-                        window.updateStatsSummary();
-                        window.renderHistoryList();
-                        window.renderStatsTables();
+                        if (typeof window.applyButtonSettings === 'function') window.applyButtonSettings();
+                        if (typeof window.updatePlayerHeaderDisplay === 'function') window.updatePlayerHeaderDisplay();
+                        if (typeof window.updateStatsSummary === 'function') window.updateStatsSummary();
+                        if (typeof window.renderHistoryList === 'function') window.renderHistoryList();
+                        if (typeof window.renderStatsTables === 'function') window.renderStatsTables();
                         this.updateBadge("Cloud Live", "text-emerald-400");
                     } else {
                         this.pushToCloud();
@@ -809,6 +815,7 @@
                         savedGames: window.savedGames,
                         buttonSettings: window.buttonSettings,
                         seasonOverrides: window.seasonOverrides,
+                        updatedBy: this.user.uid,
                         updatedAt: new Date().toISOString()
                     });
                     this.updateBadge("Cloud Live", "text-emerald-400");
