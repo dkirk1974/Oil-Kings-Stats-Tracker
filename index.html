@@ -15,11 +15,11 @@
                         oilGold: '#D4AF37',
                         nhlDark: '#0F172A',
                         nhlCard: '#1E293B',
-                        nhlBorder: '#334155',
+                        nhlBorder: '#334155'
                     }
                 }
             }
-        }
+        };
     </script>
     <style>
         body {
@@ -57,13 +57,13 @@
                     <span id="cloudSyncBadge" class="text-[10px] font-semibold text-amber-400">• Local Mode</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <button onclick="openAddPastGameModal()" class="text-xs bg-oilGreen/90 hover:bg-oilGreen border border-oilGold/40 text-oilGold font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow active:scale-95">
+                    <button type="button" onclick="openAddPastGameModal()" class="text-xs bg-oilGreen/90 hover:bg-oilGreen border border-oilGold/40 text-oilGold font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow active:scale-95">
                         <i class="fa-solid fa-plus text-[10px]"></i> Past Game
                     </button>
-                    <button onclick="toggleEditProfileModal()" title="Edit Player & Photo" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700 active:scale-95">
+                    <button type="button" onclick="toggleEditProfileModal()" title="Edit Player & Photo" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700 active:scale-95">
                         <i class="fa-solid fa-user-pen text-oilGold"></i>
                     </button>
-                    <button onclick="toggleButtonSettingsModal()" title="Stat & Button Settings" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700 active:scale-95">
+                    <button type="button" onclick="toggleButtonSettingsModal()" title="Stat & Button Settings" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700 active:scale-95">
                         <i class="fa-solid fa-sliders text-oilGold"></i>
                     </button>
                 </div>
@@ -114,16 +114,16 @@
 
             <!-- Navigation Tabs -->
             <nav class="grid grid-cols-4 bg-slate-950 border-t border-slate-800 text-[11px] font-bold text-slate-400">
-                <button onclick="switchTab('live')" id="tab-live" class="py-2.5 text-center tab-active transition">
+                <button type="button" onclick="switchTab('live')" id="tab-live" class="py-2.5 text-center tab-active transition">
                     <i class="fa-solid fa-stopwatch block text-xs mb-0.5"></i>Live Track
                 </button>
-                <button onclick="switchTab('history')" id="tab-history" class="py-2.5 text-center hover:text-white transition">
+                <button type="button" onclick="switchTab('history')" id="tab-history" class="py-2.5 text-center hover:text-white transition">
                     <i class="fa-solid fa-list-ol block text-xs mb-0.5"></i>Games
                 </button>
-                <button onclick="switchTab('stats')" id="tab-stats" class="py-2.5 text-center hover:text-white transition">
+                <button type="button" onclick="switchTab('stats')" id="tab-stats" class="py-2.5 text-center hover:text-white transition">
                     <i class="fa-solid fa-chart-column block text-xs mb-0.5"></i>Stats
                 </button>
-                <button onclick="switchTab('sms')" id="tab-sms" class="py-2.5 text-center hover:text-white transition">
+                <button type="button" onclick="switchTab('sms')" id="tab-sms" class="py-2.5 text-center hover:text-white transition">
                     <i class="fa-solid fa-comment-sms block text-xs mb-0.5"></i>SMS Recap
                 </button>
             </nav>
@@ -155,8 +155,8 @@
                     <!-- Situation / Strength Selector (EV / PP / SH) -->
                     <div id="widget-strength" class="pt-1 border-t border-slate-800/80">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="text-[9px] font-bold text-slate-400 uppercase">Play Strength (Auto +/- Rules)</span>
-                            <span id="strengthHint" class="text-[9px] text-oilGold font-semibold">EV: Goal +1 / Opp -1</span>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase">Play Strength (Auto +/- & Goal Type)</span>
+                            <span id="strengthHint" class="text-[9px] text-oilGold font-semibold">EV: Goal/A +1 +/- | Opp -1 +/-</span>
                         </div>
                         <div class="grid grid-cols-3 gap-1.5">
                             <button type="button" id="top-strength-EV" onclick="setStrengthMode('EV')" class="py-1.5 px-2 rounded-lg text-[11px] font-black bg-oilGreen border border-oilGold text-oilGold transition">
@@ -183,16 +183,16 @@
                         Total Game TOI: <span id="totalGameTOIDisplay" class="text-white font-bold">00:00</span> • Shifts: <span id="shiftCountDisplay" class="text-white font-bold">0</span>
                     </div>
                     <div class="flex gap-2">
-                        <button id="shiftToggleBtn" onclick="toggleShiftTimer()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-2">
+                        <button type="button" id="shiftToggleBtn" onclick="toggleShiftTimer()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-2">
                             <i class="fa-solid fa-play"></i> Start Shift (On Ice)
                         </button>
-                        <button id="shiftStoppageBtn" onclick="toggleShiftStoppage()" class="hidden bg-amber-600 hover:bg-amber-500 text-white font-black px-3.5 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-1.5">
+                        <button type="button" id="shiftStoppageBtn" onclick="toggleShiftStoppage()" class="hidden bg-amber-600 hover:bg-amber-500 text-white font-black px-3.5 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-pause"></i> <span>Stoppage</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- On-Ice Strength Selector (Controls Automatic +/-) -->
+                <!-- On-Ice Strength Selector (Controls Automatic +/- & PPG/PPA/SHG/SHA) -->
                 <div id="widget-PM" class="bg-slate-900 border border-slate-800 rounded-xl p-2.5">
                     <div class="flex justify-between items-center mb-1.5">
                         <span class="text-[10px] font-bold text-slate-400 uppercase">On-Ice Strength (Auto +/-)</span>
@@ -236,7 +236,7 @@
                         <div>
                             <div class="text-[10px] font-black uppercase text-rose-300">Opponent Scored</div>
                             <div class="text-lg font-black text-rose-400 mt-0.5">+1 OPPONENT GOAL</div>
-                            <span id="oppGoalSubLabel" class="text-[9px] text-rose-200/80 font-semibold block">-1 +/- (if on ice during EV/PP)</span>
+                            <span id="oppGoalSubLabel" class="text-[9px] text-rose-200/80 font-semibold block">-1 +/- (when on ice during EV/PP)</span>
                         </div>
                         <div class="bg-rose-900/60 px-3 py-1.5 rounded-lg border border-rose-700/80 text-right">
                             <span class="text-[9px] text-rose-200 font-bold uppercase block">Game Score</span>
@@ -261,16 +261,55 @@
                         <div class="text-xl font-black text-white mt-0.5">+1 SOG</div>
                     </button>
 
-                    <button id="widget-HIT" onclick="addLiveStat('HIT', 1)" class="bg-slate-800 hover:bg-slate-700 text-white p-2.5 rounded-xl border border-slate-700 active:scale-95 text-left">
+                    <button type="button" id="widget-HIT" onclick="addLiveStat('HIT', 1)" class="bg-slate-800 hover:bg-slate-700 text-white p-2.5 rounded-xl border border-slate-700 active:scale-95 text-left">
                         <div class="text-[10px] font-bold text-slate-400 uppercase">Body Check</div>
                         <div class="text-xl font-black text-white mt-0.5">+1 BODY CHECK</div>
                     </button>
 
-                    <div id="widget-PIM" class="col-span-2 bg-slate-900 p-2 rounded-xl border border-slate-800 flex flex-col justify-between">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase">Penalty (PIM)</span>
-                        <div class="grid grid-cols-2 gap-1.5 mt-1">
-                            <button type="button" onclick="addLiveStat('PIM', 2)" class="bg-amber-700 text-white font-bold py-1.5 rounded-lg text-[10px] active:scale-95">+2 Min</button>
-                            <button type="button" onclick="addLiveStat('PIM', 4)" class="bg-rose-800 text-white font-bold py-1.5 rounded-lg text-[10px] active:scale-95">+4 Min</button>
+                    <!-- Penalty Controls (Tom, Oil Kings Team, Opponent + End Buttons) -->
+                    <div id="widget-PIM" class="col-span-2 bg-slate-900 p-2.5 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Penalties & Special Teams</span>
+                            <span id="penaltyStatusText" class="text-[9px] font-black text-oilGold">Active: None (EV)</span>
+                        </div>
+
+                        <!-- Tom Penalty -->
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-lg p-2 flex items-center justify-between gap-1.5">
+                            <div class="min-w-0">
+                                <span class="text-[10px] font-black text-amber-300 block">Tom Penalty</span>
+                                <span id="tomPenaltyBadge" class="text-[9px] text-slate-400 font-semibold">0 active • Adds PIM & sets SH</span>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button type="button" onclick="applyPenalty('tom', 2)" class="bg-amber-700 hover:bg-amber-600 text-white font-black px-2 py-1.5 rounded text-[10px] active:scale-95">+2</button>
+                                <button type="button" onclick="applyPenalty('tom', 4)" class="bg-rose-800 hover:bg-rose-700 text-white font-black px-2 py-1.5 rounded text-[10px] active:scale-95">+4</button>
+                                <button type="button" onclick="endPenalty('tom')" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold px-2 py-1.5 rounded text-[10px] active:scale-95">End</button>
+                            </div>
+                        </div>
+
+                        <!-- Oil Kings Team Penalty -->
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-lg p-2 flex items-center justify-between gap-1.5">
+                            <div class="min-w-0">
+                                <span class="text-[10px] font-black text-emerald-300 block">Oil Kings Team Penalty</span>
+                                <span id="teamPenaltyBadge" class="text-[9px] text-slate-400 font-semibold">0 active • Sets SH (No Tom PIM)</span>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button type="button" onclick="applyPenalty('team', 2)" class="bg-amber-700 hover:bg-amber-600 text-white font-black px-2 py-1.5 rounded text-[10px] active:scale-95">+2</button>
+                                <button type="button" onclick="applyPenalty('team', 4)" class="bg-rose-800 hover:bg-rose-700 text-white font-black px-2 py-1.5 rounded text-[10px] active:scale-95">+4</button>
+                                <button type="button" onclick="endPenalty('team')" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold px-2 py-1.5 rounded text-[10px] active:scale-95">End</button>
+                            </div>
+                        </div>
+
+                        <!-- Opponent Penalty -->
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-lg p-2 flex items-center justify-between gap-1.5">
+                            <div class="min-w-0">
+                                <span class="text-[10px] font-black text-sky-300 block">Opponent Penalty</span>
+                                <span id="oppPenaltyBadge" class="text-[9px] text-slate-400 font-semibold">0 active • Sets PP</span>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button type="button" onclick="applyPenalty('opp', 2)" class="bg-sky-700 hover:bg-sky-600 text-white font-black px-2 py-1.5 rounded text-[10px] active:scale-95">+2</button>
+                                <button type="button" onclick="applyPenalty('opp', 4)" class="bg-indigo-700 hover:bg-indigo-600 text-white font-black px-2 py-1.5 rounded text-[10px] active:scale-95">+4</button>
+                                <button type="button" onclick="endPenalty('opp')" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold px-2 py-1.5 rounded text-[10px] active:scale-95">End</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -715,15 +754,15 @@
 
         const BUTTON_CATALOG = [
             { key: 'shiftTimer', label: 'Shift Timer (TOI & Stoppage)', desc: 'Track shifts, whistle stoppages & total game TOI' },
-            { key: 'strength', label: 'Strength Selector (EV / PP / SH)', desc: 'Switch play strength for automatic +/- rules' },
-            { key: 'G', label: '+1 Goal', desc: 'Logs Goal, Point, Shot on Goal & auto +/-' },
-            { key: 'A', label: '+1 Assist', desc: 'Logs Assist, Point & auto +/-' },
+            { key: 'strength', label: 'Strength Selector (EV / PP / SH)', desc: 'Switch play strength for automatic +/- & PPG/SHG tags' },
+            { key: 'G', label: '+1 Goal', desc: 'Logs Goal, Point, Shot on Goal, auto +/- & goal type tag' },
+            { key: 'A', label: '+1 Assist', desc: 'Logs Assist, Point, auto +/- & assist type tag' },
             { key: 'OPP_G', label: '+1 Opponent Goal', desc: 'Updates opponent score & auto +/-' },
             { key: 'FO', label: 'Faceoffs (+1 FOW / +1 FOL)', desc: 'Track faceoff wins, losses & win %' },
             { key: 'SOG', label: '+1 Shot on Goal (SOG)', desc: 'Track shots on net' },
             { key: 'HIT', label: '+1 Body Check', desc: 'Track physical body checks (for contact leagues)' },
             { key: 'PM', label: 'Strength & Auto +/- (EV/PP/SH)', desc: 'Auto-awards +/- based on strength & goals/assists' },
-            { key: 'PIM', label: 'Penalty Minutes (+2 / +4 Min)', desc: 'Track penalty minutes' }
+            { key: 'PIM', label: 'Penalties & Special Teams (Tom / Team / Opp)', desc: 'Set PP/SH automatically with +2 / +4 / End penalty controls' }
         ];
 
         const DEFAULT_BUTTON_SETTINGS = {
@@ -784,11 +823,21 @@
         window.pendingAvatarDataUrl = "";
         window.strengthMode = "EV"; // "EV", "PP", or "SH"
 
+        window.activePenalties = {
+            tom: [],   // array of penalty minute durations (e.g. [2])
+            team: [],  // array of penalty minute durations
+            opp: []    // array of penalty minute durations
+        };
+
         window.currentGame = {
             teamGoals: 0,
             oppGoals: 0,
             G: 0,
             A: 0,
+            PPG: 0,
+            PPA: 0,
+            SHG: 0,
+            SHA: 0,
             SOG: 0,
             FOW: 0,
             FOL: 0,
@@ -809,6 +858,7 @@
             loadFromStorage();
             populateSampleDataIfEmpty();
             setStrengthMode(window.strengthMode);
+            syncPenaltyUI();
             applyButtonSettings();
             updatePlayerHeaderDisplay();
             updateStatsSummary();
@@ -927,22 +977,132 @@
             if (window.strengthMode === 'EV') {
                 if (hintEl) hintEl.textContent = "EV: Goal/A +1 +/- | Opp -1 +/-";
                 if (ruleHintEl) ruleHintEl.textContent = "EV: GF +1 / GA -1";
-                if (goalSub) goalSub.textContent = "+1G, +1 PTS, +1 SOG, +1 +/-";
-                if (assistSub) assistSub.textContent = "+1A, +1 PTS, +1 +/-";
+                if (goalSub) goalSub.textContent = "+1G, +1 PTS, +1 SOG, +1 +/- (EV)";
+                if (assistSub) assistSub.textContent = "+1A, +1 PTS, +1 +/- (EV)";
                 if (oppSub) oppSub.textContent = "-1 +/- (when on ice)";
             } else if (window.strengthMode === 'PP') {
-                if (hintEl) hintEl.textContent = "PP: Goal/A 0 +/- | SH Goal Against -1 +/-";
-                if (ruleHintEl) ruleHintEl.textContent = "PP: GF 0 / SHG Against -1";
-                if (goalSub) goalSub.textContent = "+1G, +1 PTS, +1 SOG, 0 +/- (PP)";
-                if (assistSub) assistSub.textContent = "+1A, +1 PTS, 0 +/- (PP)";
+                if (hintEl) hintEl.textContent = "PP: Logs PPG/PPA (0 +/-) | Opp SHG -1 +/-";
+                if (ruleHintEl) ruleHintEl.textContent = "PP: PPG/PPA 0 +/- / SHG GA -1";
+                if (goalSub) goalSub.textContent = "+1 PPG, +1 PTS, +1 SOG, 0 +/-";
+                if (assistSub) assistSub.textContent = "+1 PPA, +1 PTS, 0 +/-";
                 if (oppSub) oppSub.textContent = "-1 +/- (shorthanded goal against)";
             } else {
-                if (hintEl) hintEl.textContent = "SH: SH Goal/A +1 +/- | Goal Against 0 +/-";
-                if (ruleHintEl) ruleHintEl.textContent = "SH: SHG For +1 / GA 0";
-                if (goalSub) goalSub.textContent = "+1G, +1 PTS, +1 SOG, +1 +/- (SH)";
-                if (assistSub) assistSub.textContent = "+1A, +1 PTS, +1 +/- (SH)";
+                if (hintEl) hintEl.textContent = "SH: Logs SHG/SHA (+1 +/-) | GA 0 +/-";
+                if (ruleHintEl) ruleHintEl.textContent = "SH: SHG/SHA +1 +/- / GA 0";
+                if (goalSub) goalSub.textContent = "+1 SHG, +1 PTS, +1 SOG, +1 +/-";
+                if (assistSub) assistSub.textContent = "+1 SHA, +1 PTS, +1 +/-";
                 if (oppSub) oppSub.textContent = "0 +/- (no -1 on penalty kill)";
             }
+        }
+
+        // Penalty Controls (Tom, Oil Kings Team, Opponent + End Buttons)
+        function computeStrengthFromPenalties() {
+            const pkCount = window.activePenalties.tom.length + window.activePenalties.team.length;
+            const ppCount = window.activePenalties.opp.length;
+
+            if (ppCount > pkCount) return 'PP';
+            if (pkCount > ppCount) return 'SH';
+            return 'EV';
+        }
+
+        function syncPenaltyUI() {
+            const tomList = window.activePenalties.tom;
+            const teamList = window.activePenalties.team;
+            const oppList = window.activePenalties.opp;
+
+            const tomBadge = document.getElementById('tomPenaltyBadge');
+            const teamBadge = document.getElementById('teamPenaltyBadge');
+            const oppBadge = document.getElementById('oppPenaltyBadge');
+            const statusText = document.getElementById('penaltyStatusText');
+
+            if (tomBadge) {
+                tomBadge.textContent = tomList.length > 0
+                    ? `${tomList.length} active (${tomList.join('m, ')}m)`
+                    : "0 active • Adds PIM & sets SH";
+            }
+            if (teamBadge) {
+                teamBadge.textContent = teamList.length > 0
+                    ? `${teamList.length} active (${teamList.join('m, ')}m)`
+                    : "0 active • Sets SH (No Tom PIM)";
+            }
+            if (oppBadge) {
+                oppBadge.textContent = oppList.length > 0
+                    ? `${oppList.length} active (${oppList.join('m, ')}m)`
+                    : "0 active • Sets PP";
+            }
+
+            if (statusText) {
+                const parts = [];
+                if (tomList.length) parts.push(`Tom(${tomList.join('/')})`);
+                if (teamList.length) parts.push(`Team(${teamList.join('/')})`);
+                if (oppList.length) parts.push(`Opp(${oppList.join('/')})`);
+                statusText.textContent = parts.length > 0
+                    ? `Active: ${parts.join(' • ')} [${window.strengthMode}]`
+                    : `Active: None (${window.strengthMode})`;
+            }
+        }
+
+        function applyPenalty(side, minutes) {
+            const period = document.getElementById('livePeriod').value;
+            const prevStrength = window.strengthMode;
+            const prevTom = window.activePenalties.tom.slice();
+            const prevTeam = window.activePenalties.team.slice();
+            const prevOpp = window.activePenalties.opp.slice();
+
+            let pimAdded = 0;
+            if (side === 'tom') {
+                window.activePenalties.tom.push(minutes);
+                pimAdded = minutes;
+                window.currentGame.PIM += pimAdded;
+            } else if (side === 'team') {
+                window.activePenalties.team.push(minutes);
+            } else if (side === 'opp') {
+                window.activePenalties.opp.push(minutes);
+            }
+
+            const nextStrength = computeStrengthFromPenalties();
+            setStrengthMode(nextStrength);
+            syncPenaltyUI();
+            refreshLiveBoxScore();
+
+            const sideLabel = side === 'tom' ? 'Tom' : (side === 'team' ? 'Oil Kings Team' : 'Opponent');
+            addLiveEventFeed(`${sideLabel} +${minutes}m penalty → ${nextStrength} (P${period})`);
+            window.liveEventLog.push({
+                statType: 'PENALTY_ADD',
+                side,
+                minutes,
+                pimAdded,
+                period,
+                prevStrength,
+                prevPenalties: { tom: prevTom, team: prevTeam, opp: prevOpp }
+            });
+        }
+
+        function endPenalty(side) {
+            const period = document.getElementById('livePeriod').value;
+            const list = window.activePenalties[side];
+            if (!list || list.length === 0) return;
+
+            const prevStrength = window.strengthMode;
+            const prevTom = window.activePenalties.tom.slice();
+            const prevTeam = window.activePenalties.team.slice();
+            const prevOpp = window.activePenalties.opp.slice();
+
+            const removedMins = list.shift();
+            const nextStrength = computeStrengthFromPenalties();
+            setStrengthMode(nextStrength);
+            syncPenaltyUI();
+
+            const sideLabel = side === 'tom' ? 'Tom' : (side === 'team' ? 'Oil Kings Team' : 'Opponent');
+            addLiveEventFeed(`${sideLabel} ${removedMins}m penalty ended → ${nextStrength} (P${period})`);
+            window.liveEventLog.push({
+                statType: 'PENALTY_END',
+                side,
+                removedMins,
+                period,
+                prevStrength,
+                prevPenalties: { tom: prevTom, team: prevTeam, opp: prevOpp }
+            });
         }
 
         // Shift Timer Controls
@@ -1025,7 +1185,6 @@
         }
 
         function calculateAutoPlusMinus(statType, strength) {
-            // Only track +/- when the strength/PM widget is enabled
             if (!window.buttonSettings || !window.buttonSettings.PM) return 0;
 
             const isGoalFor = statType === 'G' || statType === 'A';
@@ -1035,10 +1194,8 @@
             if (strength === 'EV') {
                 return isGoalFor ? 1 : -1;
             } else if (strength === 'PP') {
-                // Power play: no +1 awarded for PP goal for, -1 if scored against shorthanded
                 return isGoalAgainst ? -1 : 0;
             } else if (strength === 'SH') {
-                // Shorthanded: +1 if shorthanded goal scored for, 0 if scored against while killing penalty
                 return isGoalFor ? 1 : 0;
             }
             return 0;
@@ -1053,35 +1210,54 @@
         // Live Stat Recording
         function addLiveStat(statType, amount) {
             const period = document.getElementById('livePeriod').value;
+            const activeStrength = window.strengthMode;
             let autoPausedShift = false;
             let pmDelta = 0;
+            let specialTag = null;
 
             if (statType === 'G') {
                 window.currentGame.G += amount;
                 window.currentGame.SOG += amount;
                 window.currentGame.teamGoals += amount;
-                pmDelta = calculateAutoPlusMinus('G', window.strengthMode) * amount;
+                if (activeStrength === 'PP') {
+                    specialTag = 'PPG';
+                    window.currentGame.PPG += amount;
+                } else if (activeStrength === 'SH') {
+                    specialTag = 'SHG';
+                    window.currentGame.SHG += amount;
+                }
+                pmDelta = calculateAutoPlusMinus('G', activeStrength) * amount;
                 window.currentGame.PM += pmDelta;
                 autoPausedShift = pauseShiftForStoppage();
-                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${window.strengthMode})`;
+                const typeLabel = specialTag ? `${specialTag}` : 'GOAL [EV]';
+                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${activeStrength})`;
                 const pauseTag = autoPausedShift ? ' • Clock Paused' : '';
-                addLiveEventFeed(`GOAL [${window.strengthMode}] scored! (P${period})${pmTag}${pauseTag}`);
+                addLiveEventFeed(`${typeLabel} scored! (P${period})${pmTag}${pauseTag}`);
             } else if (statType === 'A') {
                 window.currentGame.A += amount;
-                pmDelta = calculateAutoPlusMinus('A', window.strengthMode) * amount;
+                if (activeStrength === 'PP') {
+                    specialTag = 'PPA';
+                    window.currentGame.PPA += amount;
+                } else if (activeStrength === 'SH') {
+                    specialTag = 'SHA';
+                    window.currentGame.SHA += amount;
+                }
+                pmDelta = calculateAutoPlusMinus('A', activeStrength) * amount;
                 window.currentGame.PM += pmDelta;
                 autoPausedShift = pauseShiftForStoppage();
-                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${window.strengthMode})`;
+                const typeLabel = specialTag ? `${specialTag}` : 'Assist [EV]';
+                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${activeStrength})`;
                 const pauseTag = autoPausedShift ? ' • Clock Paused' : '';
-                addLiveEventFeed(`Assist [${window.strengthMode}] recorded (P${period})${pmTag}${pauseTag}`);
+                addLiveEventFeed(`${typeLabel} recorded (P${period})${pmTag}${pauseTag}`);
             } else if (statType === 'OPP_G') {
                 window.currentGame.oppGoals += amount;
-                pmDelta = calculateAutoPlusMinus('OPP_G', window.strengthMode) * amount;
+                pmDelta = calculateAutoPlusMinus('OPP_G', activeStrength) * amount;
                 window.currentGame.PM += pmDelta;
                 autoPausedShift = pauseShiftForStoppage();
-                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${window.strengthMode})`;
+                const oppTag = activeStrength === 'PP' ? 'Opponent SHG' : (activeStrength === 'SH' ? 'Opponent PPG' : 'Opponent goal [EV]');
+                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${activeStrength})`;
                 const pauseTag = autoPausedShift ? ' • Clock Paused' : '';
-                addLiveEventFeed(`Opponent goal [${window.strengthMode}] (P${period})${pmTag}${pauseTag}`);
+                addLiveEventFeed(`${oppTag} (P${period})${pmTag}${pauseTag}`);
             } else if (statType === 'FOW') {
                 window.currentGame.FOW += amount;
                 addLiveEventFeed(`Faceoff Won (P${period})`);
@@ -1099,7 +1275,7 @@
                 addLiveEventFeed(`Penalty +${amount} PIM (P${period})`);
             }
 
-            window.liveEventLog.push({ statType, amount, period, pmDelta, autoPausedShift });
+            window.liveEventLog.push({ statType, amount, period, pmDelta, autoPausedShift, specialTag });
 
             refreshLiveBoxScore();
             updateLiveScoreDisplay();
@@ -1108,14 +1284,35 @@
         function undoLastLiveAction() {
             if (window.liveEventLog.length === 0) return;
             const last = window.liveEventLog.pop();
-            const { statType, amount, pmDelta = 0, autoPausedShift = false } = last;
+            const { statType, amount, pmDelta = 0, autoPausedShift = false, specialTag = null, pimAdded = 0, prevStrength = null, prevPenalties = null } = last;
 
-            if (statType === 'G') {
+            if (statType === 'PENALTY_ADD' || statType === 'PENALTY_END') {
+                if (prevPenalties) {
+                    window.activePenalties = {
+                        tom: prevPenalties.tom.slice(),
+                        team: prevPenalties.team.slice(),
+                        opp: prevPenalties.opp.slice()
+                    };
+                }
+                if (pimAdded > 0) {
+                    window.currentGame.PIM = Math.max(0, window.currentGame.PIM - pimAdded);
+                }
+                if (prevStrength) {
+                    setStrengthMode(prevStrength);
+                }
+                syncPenaltyUI();
+            } else if (statType === 'G') {
                 window.currentGame.G = Math.max(0, window.currentGame.G - amount);
                 window.currentGame.SOG = Math.max(0, window.currentGame.SOG - amount);
                 window.currentGame.teamGoals = Math.max(0, window.currentGame.teamGoals - amount);
+                if (specialTag && window.currentGame[specialTag] !== undefined) {
+                    window.currentGame[specialTag] = Math.max(0, window.currentGame[specialTag] - amount);
+                }
             } else if (statType === 'A') {
                 window.currentGame.A = Math.max(0, window.currentGame.A - amount);
+                if (specialTag && window.currentGame[specialTag] !== undefined) {
+                    window.currentGame[specialTag] = Math.max(0, window.currentGame[specialTag] - amount);
+                }
             } else if (statType === 'OPP_G') {
                 window.currentGame.oppGoals = Math.max(0, window.currentGame.oppGoals - amount);
             } else if (statType === 'FOW') {
@@ -1211,10 +1408,12 @@
                     window.savedGames.unshift(newGame);
                     saveToStorage();
 
-                    // Reset Live Tracker
-                    window.currentGame = { teamGoals: 0, oppGoals: 0, G: 0, A: 0, SOG: 0, FOW: 0, FOL: 0, HIT: 0, PM: 0, PIM: 0, TOISeconds: 0 };
+                    // Reset Live Tracker & Penalties
+                    window.currentGame = { teamGoals: 0, oppGoals: 0, G: 0, A: 0, PPG: 0, PPA: 0, SHG: 0, SHA: 0, SOG: 0, FOW: 0, FOL: 0, HIT: 0, PM: 0, PIM: 0, TOISeconds: 0 };
                     window.liveEventLog = [];
+                    window.activePenalties = { tom: [], team: [], opp: [] };
                     setStrengthMode('EV');
+                    syncPenaltyUI();
                     shiftCount = 0;
                     document.getElementById('shiftCountDisplay').textContent = "0";
                     document.getElementById('totalGameTOIDisplay').textContent = "00:00";
@@ -1266,7 +1465,6 @@
                     canvas.height = size;
                     const ctx = canvas.getContext('2d');
 
-                    // Center crop square
                     const minDim = Math.min(img.width, img.height);
                     const sx = (img.width - minDim) / 2;
                     const sy = (img.height - minDim) / 2;
@@ -1332,7 +1530,6 @@
         }
 
         function formatDisplayDate(dateStr) {
-            // Parse YYYY-MM-DD in local time so calendar day never shifts by timezone
             const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dateStr || '').trim());
             const dateObj = match
                 ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
@@ -1562,6 +1759,8 @@
                 `• ${g.G}G, ${g.A}A (${g.G + g.A} PTS)`
             ];
 
+            if (g.PPG || g.PPA) lines.push(`• Special Teams (PP): ${g.PPG} PPG, ${g.PPA} PPA`);
+            if (g.SHG || g.SHA) lines.push(`• Special Teams (SH): ${g.SHG} SHG, ${g.SHA} SHA`);
             if (window.buttonSettings.SOG) lines.push(`• ${g.SOG} Shots on Goal`);
             if (window.buttonSettings.FO) lines.push(`• Faceoffs: ${foStr}`);
             if (window.buttonSettings.HIT) lines.push(`• Body Checks: ${g.HIT}`);
