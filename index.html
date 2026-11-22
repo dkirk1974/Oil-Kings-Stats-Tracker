@@ -739,7 +739,15 @@
 
         // Paste your Firebase config object here when ready to link to Cloud Firestore
         // Hockey data writes to its own independent Firestore document path so it never collides with Gin Rummy data.
-        const MANUAL_FIREBASE_CONFIG = null;
+        const MANUAL_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyA8HvV2y9eKQKI_Za9BRxDko2AONwZLNn8",
+            authDomain: "gin-rummy-score.firebaseapp.com",
+            projectId: "gin-rummy-score",
+            storageBucket: "gin-rummy-score.firebasestorage.app",
+            messagingSenderId: "194625048091",
+            appId: "1:194625048091:web:0695f21dc0b4727993f2be",
+            measurementId: "G-03WGFDJHV1"
+        };
         const HOCKEY_CLOUD_DOC_PATH = ['hockeyTracker_swzOilKings', 'sharedState'];
         const DEFAULT_CONFIG_TEMPLATE = JSON.stringify({
             apiKey: "",
