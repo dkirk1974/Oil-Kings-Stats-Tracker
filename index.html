@@ -1666,6 +1666,25 @@
                         syncShiftTimerUI();
                     }
                     const resPrefix = g.teamGoals > g.oppGoals ? "W" : (g.teamGoals < g.oppGoals ? "L" : "T");
+                    const completedGameSnapshot = {
+                        opponent: opp,
+                        result: `${resPrefix} (${g.teamGoals}-${g.oppGoals})`,
+                        teamGoals: g.teamGoals,
+                        oppGoals: g.oppGoals,
+                        G: g.G,
+                        A: g.A,
+                        PPG: g.PPG,
+                        PPA: g.PPA,
+                        SHG: g.SHG,
+                        SHA: g.SHA,
+                        SOG: g.SOG,
+                        FOW: g.FOW,
+                        FOL: g.FOL,
+                        HIT: g.HIT,
+                        PM: g.PM,
+                        PIM: g.PIM,
+                        TOISeconds: g.TOISeconds
+                    };
                     const newGame = window.normalizeGameRecord({
                         id: 'g_' + Date.now(),
                         season: "2026-27",
@@ -1703,6 +1722,16 @@
                     renderHistoryList();
                     renderStatsTables();
                     switchTab('history');
+
+                    showCustomDialog(
+                        "Send Post-Game Recap?",
+                        `Game saved vs ${completedGameSnapshot.opponent}. Would you like to send the post-game SMS recap now?`,
+                        () => {
+                            switchTab('sms');
+                            preparePostGameSMS(completedGameSnapshot);
+                            launchPixelSMS();
+                        }
+                    );
                 }
             );
         }
@@ -2176,29 +2205,29 @@
             document.getElementById('smsPreviewBox').value = formatSeasonOrCareerSMS('2026-27 YTD Stats', ytd, true);
         }
 
-        function preparePastSeasonStatsSMS() {
+        function preparePostGameSMS(snap) {
             syncSMSPastSeasonOptions();
-            const select = document.getElementById('smsPastSeasonSelect');
-            const seasonName = (select && select.value) || '2025-26';
-            const seasonTotals = getSeasonTotals(seasonName);
-            document.getElementById('smsPreviewBox').value = formatSeasonOrCareerSMS(`${seasonName} Season Stats`, seasonTotals, true);
-        }
+            const p = window.playerProfile;
+            const totalFO = snap.FOW + snap.FOL;
+            const foStr = totalFO > 0 ? `${snap.FOW}/${totalFO} (${Math.round((snap.FOW / totalFO) * 100)}%)` : "0/0";
 
-        function prepareCareerStatsSMS() {
-            syncSMSPastSeasonOptions();
-            const rows = getAllSeasonNames().map(s => getSeasonTotals(s));
-            const careerTotals = rows.reduce((acc, r) => {
-                acc.GP += r.GP;
-                acc.G += r.G;
-                acc.A += r.A;
-                acc.SOG += r.SOG;
-                acc.FOW += r.FOW;
-                acc.FOL += r.FOL;
-                acc.PIM += r.PIM;
-                return acc;
-            }, { GP: 0, G: 0, A: 0, SOG: 0, FOW: 0, FOL: 0, PIM: 0 });
+            const lines = [
+                `🏒 SWZ Oil Kings — FINAL Game Recap`,
+                `Result: ${snap.result} vs ${snap.opponent}`,
+                ``,
+                `#${p.jersey} ${p.firstName}'s Game Stats:`,
+                `• ${snap.G}G, ${snap.A}A (${snap.G + snap.A} PTS)`
+            ];
 
-            document.getElementById('smsPreviewBox').value = formatSeasonOrCareerSMS('EFHL Official Career Stats', careerTotals, true);
+            if (snap.PPG || snap.PPA) lines.push(`• Special Teams (PP): ${snap.PPG} PPG, ${snap.PPA} PPA`);
+            if (snap.SHG || snap.SHA) lines.push(`• Special Teams (SH): ${snap.SHG} SHG, ${snap.SHA} SHA`);
+            if (window.buttonSettings.SOG) lines.push(`• ${snap.SOG} Shots on Goal`);
+            if (window.buttonSettings.FO) lines.push(`• Faceoffs: ${foStr}`);
+            if (window.buttonSettings.HIT) lines.push(`• Body Checks: ${snap.HIT}`);
+            if (window.buttonSettings.strength) lines.push(`• Plus/Minus: ${snap.PM > 0 ? '+' + snap.PM : snap.PM}`);
+            if (window.buttonSettings.shiftTimer) lines.push(`• Ice Time: ${formatMMSS(snap.TOISeconds)}`);
+
+            document.getElementById('smsPreviewBox').value = lines.join('\n');
         }
 
         function prepareSMS(stageLabel) {
