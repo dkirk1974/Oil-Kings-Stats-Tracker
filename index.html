@@ -733,7 +733,7 @@
 
     <!-- FIREBASE CLOUD SYNC MODULE -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -750,22 +750,25 @@
         };
         const HOCKEY_CLOUD_DOC_PATH = ['hockeyTracker_swzOilKings', 'sharedState'];
         const DEFAULT_CONFIG_TEMPLATE = JSON.stringify({
-            apiKey: "",
-            authDomain: "",
-            projectId: "",
-            storageBucket: "",
-            messagingSenderId: "",
-            appId: ""
+            apiKey: "AIzaSyA8HvV2y9eKQKI_Za9BRxDko2AONwZLNn8",
+            authDomain: "gin-rummy-score.firebaseapp.com",
+            projectId: "gin-rummy-score",
+            storageBucket: "gin-rummy-score.firebasestorage.app",
+            messagingSenderId: "194625048091",
+            appId: "1:194625048091:web:0695f21dc0b4727993f2be",
+            measurementId: "G-03WGFDJHV1"
         }, null, 2);
 
         window.cloudSync = {
             isReady: false,
             db: null,
             user: null,
+            lastError: "",
             appId: typeof __app_id !== 'undefined' && __app_id ? String(__app_id) : 'swz-oil-kings-tracker',
             template: DEFAULT_CONFIG_TEMPLATE,
 
-            updateBadge(text, colorClass) {
+            updateBadge(text, colorClass, detailMsg = "") {
+                this.lastError = detailMsg || "";
                 const badge = document.getElementById('cloudSyncBadge');
                 if (badge) {
                     badge.textContent = `• ${text}`;
@@ -773,7 +776,7 @@
                 }
                 const detail = document.getElementById('cloudSyncDetailText');
                 if (detail) {
-                    detail.textContent = `Status: ${text}`;
+                    detail.textContent = detailMsg ? `Status: ${text} — ${detailMsg}` : `Status: ${text}`;
                 }
             },
 
@@ -807,19 +810,41 @@
                     const config = savedManual || MANUAL_FIREBASE_CONFIG || (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null);
                     if (!config || !config.apiKey) {
                         this.isReady = false;
-                        this.updateBadge("Local Mode", "text-amber-400");
+                        this.updateBadge("Local Mode", "text-amber-400", "No apiKey found");
                         return;
                     }
 
-                    this.updateBadge("Connecting...", "text-oilGold");
-                    const app = initializeApp(config);
+                    this.updateBadge("Connecting...", "text-oilGold", `Project: ${config.projectId || 'configured'}`);
+                    const appName = 'swz_hockey_tracker_app';
+                    const existingApps = getApps();
+                    const app = existingApps.some(a => a.name === appName)
+                        ? getApp(appName)
+                        : initializeApp(config, appName);
                     const auth = getAuth(app);
                     this.db = getFirestore(app);
 
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
+                        try {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                            this.user = auth.currentUser;
+                            this.isReady = true;
+                            this.listenToCloud();
+                            return;
+                        } catch (tokenErr) {
+                            console.warn("Custom token sign-in skipped:", tokenErr);
+                        }
+                    }
+
+                    try {
                         await signInAnonymously(auth);
+                    } catch (authErr) {
+                        const authCode = authErr && authErr.code ? authErr.code : '';
+                        const authMsg = authErr && authErr.message ? authErr.message : String(authErr);
+                        console.warn("Anonymous auth failed, trying direct Firestore sync:", authErr);
+                        this.user = auth.currentUser || { uid: 'public-client' };
+                        this.isReady = true;
+                        this.listenToCloud(`Auth fallback (${authCode || authMsg})`);
+                        return;
                     }
 
                     onAuthStateChanged(auth, (user) => {
@@ -828,17 +853,19 @@
                             this.isReady = true;
                             this.listenToCloud();
                         } else {
-                            this.isReady = false;
-                            this.updateBadge("Local Mode", "text-amber-400");
+                            this.user = { uid: 'public-client' };
+                            this.isReady = true;
+                            this.listenToCloud("Using unauthenticated Firestore access");
                         }
                     });
                 } catch (err) {
-                    console.warn("Cloud sync init skipped:", err);
-                    this.updateBadge("Local Mode", "text-amber-400");
+                    const msg = err && err.message ? err.message : String(err);
+                    console.warn("Cloud sync init issue:", err);
+                    this.updateBadge("Cloud Issue", "text-amber-400", msg);
                 }
             },
 
-            listenToCloud() {
+            listenToCloud(note = "") {
                 if (!this.isReady || !this.user || !this.db) return;
                 const stateDocRef = this.getSharedDocRef();
 
@@ -870,17 +897,18 @@
                         if (typeof window.updateStatsSummary === 'function') window.updateStatsSummary();
                         if (typeof window.renderHistoryList === 'function') window.renderHistoryList();
                         if (typeof window.renderStatsTables === 'function') window.renderStatsTables();
-                        this.updateBadge("Cloud Live", "text-emerald-400");
+                        this.updateBadge("Cloud Live", "text-emerald-400", note || "Synced with Firestore");
                     } else {
-                        this.pushToCloud();
+                        this.pushToCloud(note);
                     }
                 }, (err) => {
+                    const msg = err && err.message ? err.message : String(err);
                     console.warn("Realtime cloud listener error:", err);
-                    this.updateBadge("Saved Locally", "text-amber-400");
+                    this.updateBadge("Saved Locally", "text-amber-400", note ? `${note} • ${msg}` : msg);
                 });
             },
 
-            async pushToCloud() {
+            async pushToCloud(note = "") {
                 if (!this.isReady || !this.user || !this.db) return;
                 try {
                     this.updateBadge("Syncing...", "text-oilGold");
@@ -890,13 +918,14 @@
                         savedGames: window.savedGames,
                         buttonSettings: window.buttonSettings,
                         seasonOverrides: window.seasonOverrides,
-                        updatedBy: this.user.uid,
+                        updatedBy: this.user.uid || 'public-client',
                         updatedAt: new Date().toISOString()
                     });
-                    this.updateBadge("Cloud Live", "text-emerald-400");
+                    this.updateBadge("Cloud Live", "text-emerald-400", note || "Synced with Firestore");
                 } catch (err) {
+                    const msg = err && err.message ? err.message : String(err);
                     console.warn("Cloud save error (data safely in localStorage):", err);
-                    this.updateBadge("Saved Locally", "text-amber-400");
+                    this.updateBadge("Saved Locally", "text-amber-400", note ? `${note} • ${msg}` : msg);
                 }
             }
         };
