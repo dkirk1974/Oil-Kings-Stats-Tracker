@@ -54,7 +54,7 @@
                 <div class="flex items-center gap-2">
                     <span class="bg-oilGreen border border-oilGold text-oilGold font-black text-[10px] px-1.5 py-0.5 rounded">OK</span>
                     <span class="text-[11px] font-bold text-slate-300 tracking-wide">SWZ Oil Kings</span>
-                    <span id="cloudSyncBadge" class="text-[10px] font-semibold text-amber-400">• Local Mode</span>
+                    <button type="button" id="cloudSyncBadge" onclick="toggleCloudSyncModal()" title="Cloud Sync Settings" class="text-[10px] font-semibold text-amber-400 hover:underline cursor-pointer">• Local Mode</button>
                 </div>
                 <div class="flex items-center gap-1.5">
                     <button type="button" onclick="openAddPastGameModal()" class="text-xs bg-oilGreen/90 hover:bg-oilGreen border border-oilGold/40 text-oilGold font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow active:scale-95">
@@ -701,6 +701,36 @@
         </div>
     </div>
 
+    <!-- ================= MODAL 6: CLOUD SYNC SETUP ================= -->
+    <div id="cloudSyncModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-4 space-y-3 text-left max-h-[90dvh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <div>
+                    <h3 class="font-black text-white text-sm uppercase">Cloud Sync Status</h3>
+                    <p id="cloudSyncDetailText" class="text-[10px] text-slate-400">Currently saving locally on this device</p>
+                </div>
+                <button type="button" onclick="toggleCloudSyncModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 space-y-1.5">
+                <span class="text-[10px] font-bold text-oilGold uppercase block">Why it shows Local Mode</span>
+                <p class="text-[11px] text-slate-300 leading-relaxed">
+                    Cloud sync connects automatically when a cloud configuration is provided in the environment or pasted below. Until then, all games, seasons, and player edits save safely in local storage.
+                </p>
+            </div>
+
+            <div>
+                <label class="text-[10px] text-slate-400 font-bold uppercase block mb-1">Cloud Config (JSON or JS Object)</label>
+                <textarea id="cloudConfigInput" rows="5" placeholder='{"apiKey":"...","projectId":"..."}' class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-[11px] font-mono text-slate-200 focus:border-oilGold focus:outline-none"></textarea>
+            </div>
+
+            <div class="flex gap-2 pt-1">
+                <button type="button" onclick="clearSavedCloudConfig()" class="w-1/3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2 rounded-xl text-xs">Clear</button>
+                <button type="button" onclick="applyCloudConfigFromModal()" class="w-2/3 bg-oilGreen hover:bg-emerald-800 text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40">Connect Cloud</button>
+            </div>
+        </div>
+    </div>
+
     <!-- FIREBASE CLOUD SYNC MODULE (Ready when MANUAL_FIREBASE_CONFIG is added) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -720,8 +750,32 @@
                 const badge = document.getElementById('cloudSyncBadge');
                 if (badge) {
                     badge.textContent = `• ${text}`;
-                    badge.className = `text-[10px] font-semibold ${colorClass}`;
+                    badge.className = `text-[10px] font-semibold ${colorClass} hover:underline cursor-pointer`;
                 }
+                const detail = document.getElementById('cloudSyncDetailText');
+                if (detail) {
+                    detail.textContent = `Status: ${text}`;
+                }
+            },
+
+            getSavedManualConfig() {
+                try {
+                    const raw = localStorage.getItem('swz_manual_cloud_config');
+                    return raw ? JSON.parse(raw) : null;
+                } catch (e) {
+                    return null;
+                }
+            },
+
+            setManualConfig(configObj) {
+                try {
+                    if (configObj) {
+                        localStorage.setItem('swz_manual_cloud_config', JSON.stringify(configObj));
+                    } else {
+                        localStorage.removeItem('swz_manual_cloud_config');
+                    }
+                } catch (e) {}
+                this.init();
             },
 
             getSharedDocRef() {
@@ -730,8 +784,10 @@
 
             async init() {
                 try {
-                    const config = MANUAL_FIREBASE_CONFIG || (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null);
+                    const savedManual = this.getSavedManualConfig();
+                    const config = savedManual || MANUAL_FIREBASE_CONFIG || (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null);
                     if (!config) {
+                        this.isReady = false;
                         this.updateBadge("Local Mode", "text-amber-400");
                         return;
                     }
@@ -831,6 +887,61 @@
 
     <!-- MAIN APPLICATION LOGIC -->
     <script>
+        function toggleCloudSyncModal() {
+            const modal = document.getElementById('cloudSyncModal');
+            if (!modal) return;
+            if (modal.classList.contains('hidden')) {
+                const input = document.getElementById('cloudConfigInput');
+                if (input && window.cloudSync && typeof window.cloudSync.getSavedManualConfig === 'function') {
+                    const existing = window.cloudSync.getSavedManualConfig();
+                    input.value = existing ? JSON.stringify(existing, null, 2) : "";
+                }
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function parseCloudConfigText(rawText) {
+            const trimmed = String(rawText || '').trim();
+            if (!trimmed) return null;
+            try {
+                return JSON.parse(trimmed);
+            } catch (e) {
+                const normalized = trimmed
+                    .replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":')
+                    .replace(/'/g, '"');
+                return JSON.parse(normalized);
+            }
+        }
+
+        function applyCloudConfigFromModal() {
+            const input = document.getElementById('cloudConfigInput');
+            const detail = document.getElementById('cloudSyncDetailText');
+            try {
+                const parsed = parseCloudConfigText(input ? input.value : '');
+                if (!parsed || typeof parsed !== 'object' || !parsed.apiKey) {
+                    if (detail) detail.textContent = "Please paste a valid config with an apiKey.";
+                    return;
+                }
+                if (window.cloudSync && typeof window.cloudSync.setManualConfig === 'function') {
+                    window.cloudSync.setManualConfig(parsed);
+                }
+                toggleCloudSyncModal();
+            } catch (err) {
+                if (detail) detail.textContent = "Could not read config format. Check JSON/keys.";
+            }
+        }
+
+        function clearSavedCloudConfig() {
+            const input = document.getElementById('cloudConfigInput');
+            if (input) input.value = "";
+            if (window.cloudSync && typeof window.cloudSync.setManualConfig === 'function') {
+                window.cloudSync.setManualConfig(null);
+            }
+            toggleCloudSyncModal();
+        }
+
         const DEFAULT_PROFILE = {
             firstName: "Darren",
             lastName: "Son",
