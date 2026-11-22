@@ -2080,18 +2080,26 @@
             const seasonRows = seasons.map(s => getSeasonTotals(s));
             const activeRows = filter === 'ALL' ? seasonRows : seasonRows.filter(r => r.season === filter);
 
-            const gp = activeRows.reduce((s, x) => s + x.GP, 0);
-            const g = activeRows.reduce((s, x) => s + x.G, 0);
-            const a = activeRows.reduce((s, x) => s + x.A, 0);
-            const pts = g + a;
-            const sog = activeRows.reduce((s, x) => s + x.SOG, 0);
-            const fow = activeRows.reduce((s, x) => s + x.FOW, 0);
-            const fol = activeRows.reduce((s, x) => s + x.FOL, 0);
-            const pim = activeRows.reduce((s, x) => s + x.PIM, 0);
+            const activeGp = activeRows.reduce((s, x) => s + x.GP, 0);
+            const activeG = activeRows.reduce((s, x) => s + x.G, 0);
+            const activeA = activeRows.reduce((s, x) => s + x.A, 0);
+            const activePts = activeG + activeA;
+            const activeSog = activeRows.reduce((s, x) => s + x.SOG, 0);
+            const activeFow = activeRows.reduce((s, x) => s + x.FOW, 0);
+            const activeFol = activeRows.reduce((s, x) => s + x.FOL, 0);
 
-            document.getElementById('statPPG').textContent = gp > 0 ? (pts / gp).toFixed(2) : "0.00";
-            document.getElementById('statShPct').textContent = sog > 0 ? ((g / sog) * 100).toFixed(1) + "%" : "0.0%";
-            document.getElementById('statFOPct').textContent = (fow + fol) > 0 ? ((fow / (fow + fol)) * 100).toFixed(1) + "%" : "0.0%";
+            document.getElementById('statPPG').textContent = activeGp > 0 ? (activePts / activeGp).toFixed(2) : "0.00";
+            document.getElementById('statShPct').textContent = activeSog > 0 ? ((activeG / activeSog) * 100).toFixed(1) + "%" : "0.0%";
+            document.getElementById('statFOPct').textContent = (activeFow + activeFol) > 0 ? ((activeFow / (activeFow + activeFol)) * 100).toFixed(1) + "%" : "0.0%";
+
+            const gp = seasonRows.reduce((s, x) => s + x.GP, 0);
+            const g = seasonRows.reduce((s, x) => s + x.G, 0);
+            const a = seasonRows.reduce((s, x) => s + x.A, 0);
+            const pts = g + a;
+            const sog = seasonRows.reduce((s, x) => s + x.SOG, 0);
+            const fow = seasonRows.reduce((s, x) => s + x.FOW, 0);
+            const fol = seasonRows.reduce((s, x) => s + x.FOL, 0);
+            const pim = seasonRows.reduce((s, x) => s + x.PIM, 0);
 
             const tbody = document.getElementById('careerStatsBody');
             const rowsHtml = seasonRows.map(r => {
@@ -2113,10 +2121,9 @@
             }).join('');
 
             const totalFoPct = (fow + fol) > 0 ? Math.round((fow / (fow + fol)) * 100) + "%" : "-";
-            const totalLabel = filter === 'ALL' ? 'TOTALS (ALL)' : `TOTALS (${filter})`;
             const totalsRowHtml = `
                 <tr class="bg-slate-950/90 border-t-2 border-oilGold/50 font-black text-white">
-                    <td class="p-2 text-oilGold uppercase text-[10px]">${totalLabel}</td>
+                    <td class="p-2 text-oilGold uppercase text-[10px]">TOTALS</td>
                     <td class="p-2 text-center">${gp}</td>
                     <td class="p-2 text-center text-emerald-400">${g}</td>
                     <td class="p-2 text-center text-blue-400">${a}</td>
