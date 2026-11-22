@@ -1,4 +1,62 @@
-<!-- ... existing code ... -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SWZ Oil Kings - Player & Game Stat Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        oilGreen: '#1B4D3E',
+                        oilGold: '#D4AF37',
+                        nhlDark: '#0F172A',
+                        nhlCard: '#1E293B',
+                        nhlBorder: '#334155',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #020617;
+            color: #F8FAFC;
+            overscroll-behavior-y: contain;
+        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        .tab-active {
+            border-bottom: 3px solid #D4AF37;
+            color: #D4AF37;
+            font-weight: 700;
+        }
+        .jersey-pattern {
+            background-image: radial-gradient(rgba(212, 175, 55, 0.14) 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 min-h-[100dvh] flex justify-center">
+
+    <!-- Main App Container (Full Screen on Mobile, Centered Card on Desktop) -->
+    <div class="w-full max-w-md min-h-[100dvh] bg-slate-950 md:border-x md:border-slate-800 flex flex-col relative shadow-2xl">
+
+        <!-- TOP PLAYER PROFILE HEADER -->
+        <header class="bg-gradient-to-b from-[#0b1626] via-[#0F172A] to-slate-950 border-b-2 border-oilGold/80 jersey-pattern shrink-0">
+            <!-- Top Utility Row -->
+            <div class="flex justify-between items-center px-3 pt-3 pb-1.5 border-b border-slate-800/80">
+                <div class="flex items-center gap-2">
+                    <span class="bg-oilGreen border border-oilGold text-oilGold font-black text-[10px] px-1.5 py-0.5 rounded">OK</span>
+                    <span class="text-[11px] font-bold text-slate-300 tracking-wide">SWZ Oil Kings</span>
+                    <span id="cloudSyncBadge" class="text-[10px] font-semibold text-amber-400">• Local Mode</span>
+                </div>
+                <div class="flex items-center gap-1.5">
                     <button onclick="openAddPastGameModal()" class="text-xs bg-oilGreen/90 hover:bg-oilGreen border border-oilGold/40 text-oilGold font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow active:scale-95">
                         <i class="fa-solid fa-plus text-[10px]"></i> Past Game
                     </button>
@@ -10,14 +68,104 @@
                     </button>
                 </div>
             </div>
-<!-- ... existing code ... -->
+
+            <!-- Player Info & Headshot -->
+            <div class="p-3 flex items-center gap-3">
+                <div onclick="toggleEditProfileModal()" class="relative shrink-0 cursor-pointer group" title="Tap to edit player & photo">
+                    <img id="playerAvatar" src="https://ui-avatars.com/api/?name=Darren+Son&background=1B4D3E&color=D4AF37&size=128&bold=true" alt="Player" class="w-16 h-16 rounded-full border-2 border-oilGold object-cover bg-slate-800 shadow-lg group-hover:opacity-90">
+                    <span id="jerseyBadge" class="absolute -bottom-1 -right-1 bg-oilGreen border border-oilGold text-white font-black text-xs px-1.5 py-0.5 rounded-md shadow">#44</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-1.5">
+                        <h1 id="playerNameDisplay" class="text-lg font-black text-white truncate tracking-tight">Darren Son</h1>
+                    </div>
+                    <p id="playerTeamDisplay" class="text-xs font-bold text-oilGold">SWZ Oil Kings • <span id="playerPosDisplay">Center</span></p>
+                    <div class="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-[10px] text-slate-300 font-semibold">
+                        <span>HT: <strong id="playerHeightDisplay" class="text-white">5'6"</strong></span>
+                        <span>WT: <strong id="playerWeightDisplay" class="text-white">140 lbs</strong></span>
+                        <span>SH: <strong id="playerShootsDisplay" class="text-white">L</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NHL Quick Season Summary Strip -->
+            <div class="grid grid-cols-5 bg-slate-900/90 border-t border-slate-800 py-2 px-1 text-center">
+                <div>
+                    <span class="text-[9px] text-slate-400 font-bold uppercase block">GP</span>
+                    <span id="headerGP" class="text-sm font-black text-white">0</span>
+                </div>
+                <div>
+                    <span class="text-[9px] text-slate-400 font-bold uppercase block">G</span>
+                    <span id="headerG" class="text-sm font-black text-emerald-400">0</span>
+                </div>
+                <div>
+                    <span class="text-[9px] text-slate-400 font-bold uppercase block">A</span>
+                    <span id="headerA" class="text-sm font-black text-blue-400">0</span>
+                </div>
+                <div>
+                    <span class="text-[9px] text-slate-400 font-bold uppercase block">PTS</span>
+                    <span id="headerPTS" class="text-sm font-black text-oilGold">0</span>
+                </div>
+                <div>
+                    <span class="text-[9px] text-slate-400 font-bold uppercase block">+/-</span>
+                    <span id="headerPM" class="text-sm font-black text-slate-200">0</span>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="grid grid-cols-4 bg-slate-950 border-t border-slate-800 text-[11px] font-bold text-slate-400">
+                <button onclick="switchTab('live')" id="tab-live" class="py-2.5 text-center tab-active transition">
+                    <i class="fa-solid fa-stopwatch block text-xs mb-0.5"></i>Live Track
+                </button>
+                <button onclick="switchTab('history')" id="tab-history" class="py-2.5 text-center hover:text-white transition">
+                    <i class="fa-solid fa-list-ol block text-xs mb-0.5"></i>Games
+                </button>
+                <button onclick="switchTab('stats')" id="tab-stats" class="py-2.5 text-center hover:text-white transition">
+                    <i class="fa-solid fa-chart-column block text-xs mb-0.5"></i>Stats
+                </button>
+                <button onclick="switchTab('sms')" id="tab-sms" class="py-2.5 text-center hover:text-white transition">
+                    <i class="fa-solid fa-comment-sms block text-xs mb-0.5"></i>SMS Recap
+                </button>
+            </nav>
+        </header>
+
+        <!-- MAIN SCROLLABLE BODY -->
+        <main class="flex-1 overflow-y-auto p-3 space-y-3 pb-10">
+
+            <!-- ================= TAB 1: LIVE TRACKER ================= -->
+            <section id="view-live" class="space-y-3">
+                <!-- Game Info & Period Selector -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 flex items-center gap-2">
+                    <div class="flex-1">
+                        <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Opponent Team</label>
+                        <input type="text" id="liveOpponent" oninput="updateLiveScoreDisplay()" placeholder="e.g., KC Knights" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-oilGold focus:outline-none">
+                    </div>
+                    <div class="w-24">
+                        <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Period</label>
+                        <select id="livePeriod" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-oilGold font-bold focus:border-oilGold focus:outline-none">
+                            <option value="1">1st Period</option>
+                            <option value="2">2nd Period</option>
+                            <option value="3">3rd Period</option>
+                            <option value="OT">Overtime</option>
+                        </select>
+                    </div>
+                </div>
+
                 <!-- Shift Timer Widget -->
                 <div id="widget-shiftTimer" class="bg-gradient-to-r from-slate-900 via-nhlDark to-slate-900 border border-slate-800 rounded-2xl p-3.5 text-center shadow">
                     <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 mb-1">
                         <span>SHIFT TIMER</span>
                         <span id="shiftStatus" class="bg-slate-800 px-2 py-0.5 rounded text-slate-300">OFF ICE</span>
                     </div>
-<!-- ... existing code ... -->
+                    <div id="shiftClockDisplay" class="text-4xl font-black text-oilGold tracking-wider font-mono my-1">00:00</div>
+                    <div class="text-[11px] text-slate-400 font-semibold mb-2.5">
+                        Total Game TOI: <span id="totalGameTOIDisplay" class="text-white font-bold">00:00</span> • Shifts: <span id="shiftCountDisplay" class="text-white font-bold">0</span>
+                    </div>
+                    <button id="shiftToggleBtn" onclick="toggleShiftTimer()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play"></i> Start Shift (On Ice)
+                    </button>
+                </div>
+
                 <!-- Rapid Entry Stat Buttons -->
                 <div class="grid grid-cols-2 gap-2">
                     <button id="widget-G" onclick="addLiveStat('G', 1)" class="bg-gradient-to-br from-emerald-600 to-oilGreen hover:from-emerald-500 hover:to-emerald-700 text-white p-3 rounded-xl shadow border-b-2 border-emerald-950 text-left active:scale-95 transition">
@@ -57,8 +205,8 @@
                             <span class="text-[9px] font-bold text-oilGold" id="foPctDisplay">0% FO</span>
                         </div>
                         <div class="grid grid-cols-2 gap-1.5 mt-1">
-                            <button onclick="addLiveStat('FOW', 1)" class="bg-emerald-700 hover:bg-emerald-600 text-white font-black py-1.5 rounded-lg text-xs">+1 FOW</button>
-                            <button onclick="addLiveStat('FOL', 1)" class="bg-rose-800 hover:bg-rose-700 text-white font-black py-1.5 rounded-lg text-xs">+1 FOL</button>
+                            <button onclick="addLiveStat('FOW', 1)" class="bg-emerald-700 hover:bg-emerald-600 text-white font-black py-1.5 rounded-lg text-xs active:scale-95">+1 FOW</button>
+                            <button onclick="addLiveStat('FOL', 1)" class="bg-rose-800 hover:bg-rose-700 text-white font-black py-1.5 rounded-lg text-xs active:scale-95">+1 FOL</button>
                         </div>
                     </div>
 
@@ -75,20 +223,204 @@
                     <div id="widget-PM" class="bg-slate-900 p-2 rounded-xl border border-slate-800 flex flex-col justify-between">
                         <span class="text-[10px] font-bold text-slate-400 uppercase">Plus / Minus</span>
                         <div class="grid grid-cols-2 gap-1.5 mt-1">
-                            <button onclick="addLiveStat('PM', 1)" class="bg-emerald-700 text-white font-black py-1.5 rounded-lg text-xs">+1</button>
-                            <button onclick="addLiveStat('PM', -1)" class="bg-rose-700 text-white font-black py-1.5 rounded-lg text-xs">-1</button>
+                            <button onclick="addLiveStat('PM', 1)" class="bg-emerald-700 text-white font-black py-1.5 rounded-lg text-xs active:scale-95">+1</button>
+                            <button onclick="addLiveStat('PM', -1)" class="bg-rose-700 text-white font-black py-1.5 rounded-lg text-xs active:scale-95">-1</button>
                         </div>
                     </div>
 
                     <div id="widget-PIM" class="bg-slate-900 p-2 rounded-xl border border-slate-800 flex flex-col justify-between">
                         <span class="text-[10px] font-bold text-slate-400 uppercase">Penalty (PIM)</span>
                         <div class="grid grid-cols-2 gap-1.5 mt-1">
-                            <button onclick="addLiveStat('PIM', 2)" class="bg-amber-700 text-white font-bold py-1.5 rounded-lg text-[10px]">+2 Min</button>
-                            <button onclick="addLiveStat('PIM', 4)" class="bg-rose-800 text-white font-bold py-1.5 rounded-lg text-[10px]">+4 Min</button>
+                            <button onclick="addLiveStat('PIM', 2)" class="bg-amber-700 text-white font-bold py-1.5 rounded-lg text-[10px] active:scale-95">+2 Min</button>
+                            <button onclick="addLiveStat('PIM', 4)" class="bg-rose-800 text-white font-bold py-1.5 rounded-lg text-[10px] active:scale-95">+4 Min</button>
                         </div>
                     </div>
                 </div>
-<!-- ... existing code ... -->
+
+                <!-- Live Game Box Score Summary -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[10px] font-black text-slate-400 uppercase">Current Game Line</span>
+                        <button onclick="undoLastLiveAction()" class="text-[10px] text-amber-400 hover:underline font-bold">
+                            <i class="fa-solid fa-rotate-left"></i> Undo Last
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center bg-slate-950 rounded-lg p-2 border border-slate-800">
+                        <div><span class="text-[9px] text-slate-500 block">G</span><strong id="liveG" class="text-xs text-emerald-400">0</strong></div>
+                        <div><span class="text-[9px] text-slate-500 block">A</span><strong id="liveA" class="text-xs text-blue-400">0</strong></div>
+                        <div><span class="text-[9px] text-slate-500 block">PTS</span><strong id="livePTS" class="text-xs text-oilGold">0</strong></div>
+                        <div><span class="text-[9px] text-slate-500 block">SOG</span><strong id="liveSOG" class="text-xs text-white">0</strong></div>
+                        <div><span class="text-[9px] text-slate-500 block">FO</span><strong id="liveFO" class="text-xs text-white">0-0</strong></div>
+                        <div><span class="text-[9px] text-slate-500 block">+/-</span><strong id="livePM" class="text-xs text-white">0</strong></div>
+                        <div><span class="text-[9px] text-slate-500 block">PIM</span><strong id="livePIM" class="text-xs text-amber-400">0</strong></div>
+                    </div>
+                    <div id="liveEventFeed" class="mt-2 max-h-20 overflow-y-auto space-y-1 text-[10px] text-slate-400">
+                        <p class="italic text-slate-600">Tap buttons above to log live play-by-play...</p>
+                    </div>
+                </div>
+
+                <!-- Finish & Save Game Button -->
+                <button onclick="confirmFinishGame()" class="w-full bg-oilGreen hover:bg-emerald-800 border border-oilGold text-oilGold font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg active:scale-95 transition">
+                    <i class="fa-solid fa-floppy-disk mr-1"></i> Finish & Save Game to Season Log
+                </button>
+            </section>
+
+            <!-- ================= TAB 2: GAME HISTORY ================= -->
+            <section id="view-history" class="hidden space-y-2.5">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xs font-black uppercase text-slate-300 tracking-wider">Season Game Log</h2>
+                    <button onclick="openAddPastGameModal()" class="text-[11px] bg-oilGreen text-oilGold px-2.5 py-1 rounded-lg font-bold border border-oilGold/40">
+                        + Add Past Game
+                    </button>
+                </div>
+                <div id="gameHistoryList" class="space-y-2">
+                    <!-- Rendered dynamically -->
+                </div>
+            </section>
+
+            <!-- ================= TAB 3: NHL SEASON & CAREER STATS ================= -->
+            <section id="view-stats" class="hidden space-y-3">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xs font-black uppercase text-slate-300 tracking-wider">Season Breakdown</h2>
+                    <select id="seasonFilter" onchange="renderStatsTables()" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs text-oilGold font-bold">
+                        <option value="ALL">All Seasons (Career)</option>
+                        <option value="2026-27" selected>2026-27 Season</option>
+                        <option value="2025-26">2025-26 Season</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-slate-900 border border-slate-800 p-2.5 rounded-xl text-center">
+                        <span class="text-[9px] text-slate-400 font-bold uppercase block">Pts / Game</span>
+                        <span id="statPPG" class="text-lg font-black text-oilGold">0.00</span>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 p-2.5 rounded-xl text-center">
+                        <span class="text-[9px] text-slate-400 font-bold uppercase block">Shooting %</span>
+                        <span id="statShPct" class="text-lg font-black text-emerald-400">0.0%</span>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 p-2.5 rounded-xl text-center">
+                        <span class="text-[9px] text-slate-400 font-bold uppercase block">Faceoff %</span>
+                        <span id="statFOPct" class="text-lg font-black text-blue-400">0.0%</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                    <div class="bg-slate-950 px-3 py-2 border-b border-slate-800">
+                        <span class="text-[10px] font-black uppercase text-oilGold">NHL Official Career Totals</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-[11px] text-left">
+                            <thead class="bg-slate-950/60 text-slate-400 border-b border-slate-800">
+                                <tr>
+                                    <th class="p-2">Season</th>
+                                    <th class="p-2 text-center">GP</th>
+                                    <th class="p-2 text-center">G</th>
+                                    <th class="p-2 text-center">A</th>
+                                    <th class="p-2 text-center text-oilGold">PTS</th>
+                                    <th class="p-2 text-center">SOG</th>
+                                    <th class="p-2 text-center">FO%</th>
+                                    <th class="p-2 text-center">PIM</th>
+                                </tr>
+                            </thead>
+                            <tbody id="careerStatsBody" class="divide-y divide-slate-800 font-semibold">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= TAB 4: INTERMISSION SMS RECAPS ================= -->
+            <section id="view-sms" class="hidden space-y-3">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 space-y-2.5">
+                    <h2 class="text-xs font-black uppercase text-oilGold">Intermission & Game SMS Recap</h2>
+                    <p class="text-[11px] text-slate-400">Tap a button below to open your Pixel Messages app pre-filled with your son's game stats.</p>
+
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button onclick="prepareSMS('End of 1st Period')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold py-2 rounded-lg text-[11px]">End of P1</button>
+                        <button onclick="prepareSMS('End of 2nd Period')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold py-2 rounded-lg text-[11px]">End of P2</button>
+                        <button onclick="prepareSMS('FINAL Game Recap')" class="bg-oilGreen hover:bg-emerald-800 border border-oilGold/50 text-oilGold font-black py-2 rounded-lg text-[11px]">FINAL</button>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Preview Message</label>
+                        <textarea id="smsPreviewBox" rows="7" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:border-oilGold focus:outline-none"></textarea>
+                    </div>
+
+                    <button onclick="launchPixelSMS()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider shadow flex items-center justify-center gap-2 active:scale-95">
+                        <i class="fa-solid fa-paper-plane"></i> Open in Messages App
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ================= MODAL 1: EDIT PLAYER PROFILE & PHOTO ================= -->
+    <div id="editProfileModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-4 space-y-3 text-left max-h-[90dvh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 class="font-black text-white text-sm uppercase">Edit Player Info & Photo</h3>
+                <button onclick="toggleEditProfileModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <!-- Headshot Upload from Phone -->
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center gap-3">
+                <img id="modalAvatarPreview" src="" alt="Preview" class="w-12 h-12 rounded-full border border-oilGold object-cover bg-slate-800 shrink-0">
+                <div class="flex-1 min-w-0">
+                    <label class="inline-flex items-center gap-1.5 bg-oilGreen hover:bg-emerald-800 border border-oilGold/40 text-oilGold font-bold text-xs px-3 py-1.5 rounded-lg cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-camera"></i> Choose Photo from Phone
+                        <input type="file" accept="image/*" onchange="handlePhotoUpload(event)" class="hidden">
+                    </label>
+                    <p id="photoUploadLabel" class="text-[10px] text-slate-400 mt-1 truncate">Auto-resized for fast saving</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">First Name</label>
+                    <input type="text" id="inputFirstName" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Last Name</label>
+                    <input type="text" id="inputLastName" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Jersey #</label>
+                    <input type="text" id="inputJersey" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+                <div class="col-span-2">
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Position</label>
+                    <select id="inputPos" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                        <option value="Center">Center</option>
+                        <option value="Left Wing">Left Wing</option>
+                        <option value="Right Wing">Right Wing</option>
+                        <option value="Defense">Defense</option>
+                        <option value="Goalie">Goalie</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Height</label>
+                    <input type="text" id="inputHeight" placeholder="5'6&quot;" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Weight</label>
+                    <input type="text" id="inputWeight" placeholder="140 lbs" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Shoots</label>
+                    <select id="inputShoots" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                        <option value="L">Left (L)</option>
+                        <option value="R">Right (R)</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="flex gap-2 pt-2">
                 <button onclick="toggleEditProfileModal()" class="w-1/2 bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">Cancel</button>
                 <button onclick="savePlayerProfile()" class="w-1/2 bg-oilGreen text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40">Save Profile</button>
@@ -96,7 +428,7 @@
         </div>
     </div>
 
-    <!-- STAT & BUTTON VISIBILITY SETTINGS MODAL -->
+    <!-- ================= MODAL 2: STAT & BUTTON SETTINGS ================= -->
     <div id="buttonSettingsModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-4 space-y-3 text-left max-h-[85dvh] flex flex-col">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2 shrink-0">
@@ -118,15 +450,175 @@
         </div>
     </div>
 
-    <!-- CUSTOM IN-PAGE NOTIFICATION / CONFIRMATION MODAL (No browser alert/confirm) -->
-<!-- ... existing code ... -->
+    <!-- ================= MODAL 3: ADD / EDIT PAST GAME ================= -->
+    <div id="gameEditorModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-4 space-y-2.5 text-left max-h-[90dvh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 id="gameModalTitle" class="font-black text-white text-sm uppercase">Add Past Game</h3>
+                <button onclick="closeGameEditorModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <input type="hidden" id="editingGameId">
+
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Date</label>
+                    <input type="text" id="modalGameDate" placeholder="Nov 15, 2026" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Season</label>
+                    <select id="modalGameSeason" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                        <option value="2026-27">2026-27</option>
+                        <option value="2025-26">2025-26</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+                <div class="col-span-2">
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Opponent</label>
+                    <input type="text" id="modalOpponent" placeholder="e.g., St. Albert Raiders" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Result</label>
+                    <input type="text" id="modalResult" placeholder="W (5-3)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-2">
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Goals</label>
+                    <input type="number" id="modalG" value="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Assists</label>
+                    <input type="number" id="modalA" value="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">SOG</label>
+                    <input type="number" id="modalSOG" value="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">+/-</label>
+                    <input type="number" id="modalPM" value="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-2">
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">FOW</label>
+                    <input type="number" id="modalFOW" value="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">FOL</label>
+                    <input type="number" id="modalFOL" value="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">Checks</label>
+                    <input type="number" id="modalHIT" value="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase block">PIM</label>
+                    <input type="number" id="modalPIM" value="0" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+                </div>
+            </div>
+
+            <div>
+                <label class="text-[10px] text-slate-400 font-bold uppercase block">Total Ice Time (Minutes)</label>
+                <input type="number" id="modalTOIMins" value="15" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+            </div>
+
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeGameEditorModal()" class="w-1/2 bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">Cancel</button>
+                <button onclick="saveEditedGame()" class="w-1/2 bg-oilGreen text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40">Save Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 4: CUSTOM IN-PAGE CONFIRMATION / ALERT ================= -->
+    <div id="customDialogModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xs w-full p-4 space-y-3 text-center shadow-2xl">
+            <h4 id="dialogTitle" class="text-sm font-black text-white uppercase">Confirm Action</h4>
+            <p id="dialogMessage" class="text-xs text-slate-300 leading-relaxed"></p>
+            <div class="flex gap-2 pt-1">
+                <button id="dialogCancelBtn" onclick="closeCustomDialog()" class="w-1/2 bg-slate-800 text-slate-300 font-bold py-2 rounded-xl text-xs">Cancel</button>
+                <button id="dialogConfirmBtn" class="w-1/2 bg-oilGreen text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIREBASE CLOUD SYNC MODULE (Ready when MANUAL_FIREBASE_CONFIG is added) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Paste your Firebase config object here when ready to link to Cloud Firestore
+        const MANUAL_FIREBASE_CONFIG = null;
+
+        window.cloudSync = {
+            isReady: false,
+            db: null,
+            user: null,
+            appId: 'swz-oil-kings-tracker',
+
+            updateBadge(text, colorClass) {
+                const badge = document.getElementById('cloudSyncBadge');
+                if (badge) {
+                    badge.textContent = `• ${text}`;
+                    badge.className = `text-[10px] font-semibold ${colorClass}`;
+                }
+            },
+
+            getSharedDocRef() {
+                return doc(this.db, 'artifacts', this.appId, 'public', 'data', 'hockeyTracker', 'sharedState');
+            },
+
+            init() {
+                try {
+                    const config = MANUAL_FIREBASE_CONFIG || (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null);
+                    if (!config) {
+                        this.updateBadge("Local Mode", "text-amber-400");
+                        return;
+                    }
+
+                    const app = initializeApp(config);
+                    const auth = getAuth(app);
+                    this.db = getFirestore(app);
+
+                    onAuthStateChanged(auth, (user) => {
+                        if (user) {
+                            this.user = user;
+                            this.isReady = true;
+                            this.listenToCloud();
+                        }
+                    });
+
+                    signInAnonymously(auth).catch((err) => {
+                        console.warn("Firebase auth skipped:", err);
+                        this.updateBadge("Local Mode", "text-amber-400");
+                    });
+                } catch (err) {
+                    console.warn("Firebase init skipped:", err);
+                    this.updateBadge("Local Mode", "text-amber-400");
+                }
+            },
+
+            listenToCloud() {
+                if (!this.isReady || !this.user || !this.db) return;
+                const stateDocRef = this.getSharedDocRef();
+
+                onSnapshot(stateDocRef, (snap) => {
+                    if (snap.exists()) {
+                        const cloudData = snap.data();
+                        if (cloudData.playerProfile) {
+                            window.playerProfile = window.normalizePlayerProfile(cloudData.playerProfile);
+                        }
                         if (Array.isArray(cloudData.savedGames)) {
                             window.savedGames = cloudData.savedGames.map(window.normalizeGameRecord);
                         }
                         if (cloudData.buttonSettings) {
                             window.buttonSettings = window.normalizeButtonSettings(cloudData.buttonSettings);
                         }
-                        // Cache fresh cloud pull locally and refresh UI
                         try {
                             localStorage.setItem('swz_playerProfile', JSON.stringify(window.playerProfile));
                             localStorage.setItem('swz_savedGames', JSON.stringify(window.savedGames));
@@ -140,7 +632,6 @@
                         window.renderStatsTables();
                         this.updateBadge("Cloud Live", "text-emerald-400");
                     } else {
-                        // First time cloud setup: push existing local data up
                         this.pushToCloud();
                     }
                 }, (err) => {
@@ -167,9 +658,21 @@
                 }
             }
         };
-<!-- ... existing code ... -->
-        window.normalizePlayerProfile = function(raw) {
-            return Object.assign({}, DEFAULT_PROFILE, raw || {});
+
+        window.cloudSync.init();
+    </script>
+
+    <!-- MAIN APPLICATION LOGIC -->
+    <script>
+        const DEFAULT_PROFILE = {
+            firstName: "Darren",
+            lastName: "Son",
+            jersey: "44",
+            position: "Center",
+            height: "5'6\"",
+            weight: "140 lbs",
+            shoots: "L",
+            avatarUrl: ""
         };
 
         const BUTTON_CATALOG = [
@@ -191,9 +694,13 @@
             OPP_G: true,
             FO: true,
             SOG: true,
-            HIT: false, // Default off for non-contact leagues; easy to enable later
+            HIT: false, // Disabled by default for non-contact leagues
             PM: true,
             PIM: true
+        };
+
+        window.normalizePlayerProfile = function(raw) {
+            return Object.assign({}, DEFAULT_PROFILE, raw || {});
         };
 
         window.normalizeButtonSettings = function(raw) {
@@ -209,16 +716,55 @@
         };
 
         window.normalizeGameRecord = function(raw) {
-<!-- ... existing code ... -->
-        // Global Application State
+            const g = Number(raw?.G) || 0;
+            const a = Number(raw?.A) || 0;
+            return {
+                id: String(raw?.id || ('g_' + Date.now() + Math.random().toString(36).slice(2, 6))),
+                season: String(raw?.season || "2026-27"),
+                date: String(raw?.date || "Oct 28, 2026"),
+                opponent: String(raw?.opponent || "Opponent"),
+                result: String(raw?.result || "W (4-2)"),
+                G: g,
+                A: a,
+                PTS: raw?.PTS !== undefined ? (Number(raw.PTS) || 0) : (g + a),
+                SOG: Number(raw?.SOG) || 0,
+                FOW: Number(raw?.FOW) || 0,
+                FOL: Number(raw?.FOL) || 0,
+                HIT: Number(raw?.HIT) || 0,
+                PM: Number(raw?.PM) || 0,
+                PIM: Number(raw?.PIM) || 0,
+                TOISeconds: Number(raw?.TOISeconds) || 0
+            };
+        };
+
+        // Global State
         window.playerProfile = Object.assign({}, DEFAULT_PROFILE);
         window.buttonSettings = Object.assign({}, DEFAULT_BUTTON_SETTINGS);
-        window.selectedSeason = "2026-27";
         window.savedGames = [];
         window.liveEventLog = [];
-<!-- ... existing code ... -->
-        // Initialize on Load (Instant Local Render First)
-        window.onload = function () {
+        window.pendingAvatarDataUrl = "";
+
+        window.currentGame = {
+            teamGoals: 0,
+            oppGoals: 0,
+            G: 0,
+            A: 0,
+            SOG: 0,
+            FOW: 0,
+            FOL: 0,
+            HIT: 0,
+            PM: 0,
+            PIM: 0,
+            TOISeconds: 0
+        };
+
+        // Shift Timer Variables
+        let shiftInterval = null;
+        let isShiftActive = false;
+        let currentShiftSeconds = 0;
+        let shiftCount = 0;
+
+        window.onload = function() {
             loadFromStorage();
             populateSampleDataIfEmpty();
             applyButtonSettings();
@@ -229,6 +775,42 @@
             updateLiveScoreDisplay();
         };
 
+        // Tab Navigation
+        function switchTab(tabName) {
+            ['live', 'history', 'stats', 'sms'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('tab-active');
+            });
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).classList.add('tab-active');
+
+            if (tabName === 'sms') prepareSMS('FINAL Game Recap');
+            if (tabName === 'stats') renderStatsTables();
+            if (tabName === 'history') renderHistoryList();
+        }
+
+        // Custom In-Page Dialog Helpers
+        function showCustomDialog(title, message, onConfirm, showCancel = true) {
+            document.getElementById('dialogTitle').textContent = title;
+            document.getElementById('dialogMessage').textContent = message;
+            const cancelBtn = document.getElementById('dialogCancelBtn');
+            const confirmBtn = document.getElementById('dialogConfirmBtn');
+            cancelBtn.style.display = showCancel ? 'block' : 'none';
+            confirmBtn.className = showCancel
+                ? 'w-1/2 bg-oilGreen text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40'
+                : 'w-full bg-oilGreen text-oilGold font-black py-2 rounded-xl text-xs border border-oilGold/40';
+            confirmBtn.onclick = () => {
+                closeCustomDialog();
+                if (typeof onConfirm === 'function') onConfirm();
+            };
+            document.getElementById('customDialogModal').classList.remove('hidden');
+        }
+
+        function closeCustomDialog() {
+            document.getElementById('customDialogModal').classList.add('hidden');
+        }
+
+        // Stat & Button Settings Modal
         function toggleButtonSettingsModal() {
             const modal = document.getElementById('buttonSettingsModal');
             if (modal.classList.contains('hidden')) {
@@ -275,12 +857,505 @@
                 }
             });
         };
-<!-- ... existing code ... -->
+
+        // Shift Timer Controls
+        function toggleShiftTimer() {
+            const btn = document.getElementById('shiftToggleBtn');
+            const status = document.getElementById('shiftStatus');
+
+            if (!isShiftActive) {
+                isShiftActive = true;
+                shiftCount++;
+                document.getElementById('shiftCountDisplay').textContent = shiftCount;
+                status.textContent = "ON ICE";
+                status.className = "bg-emerald-600 px-2 py-0.5 rounded text-white font-black";
+                btn.innerHTML = '<i class="fa-solid fa-stop"></i> End Shift (Off Ice)';
+                btn.className = "w-full bg-rose-600 hover:bg-rose-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-2";
+
+                shiftInterval = setInterval(() => {
+                    currentShiftSeconds++;
+                    window.currentGame.TOISeconds++;
+                    document.getElementById('shiftClockDisplay').textContent = formatMMSS(currentShiftSeconds);
+                    document.getElementById('totalGameTOIDisplay').textContent = formatMMSS(window.currentGame.TOISeconds);
+                }, 1000);
+            } else {
+                isShiftActive = false;
+                clearInterval(shiftInterval);
+                currentShiftSeconds = 0;
+                document.getElementById('shiftClockDisplay').textContent = "00:00";
+                status.textContent = "OFF ICE";
+                status.className = "bg-slate-800 px-2 py-0.5 rounded text-slate-300";
+                btn.innerHTML = '<i class="fa-solid fa-play"></i> Start Shift (On Ice)';
+                btn.className = "w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wider shadow active:scale-95 transition flex items-center justify-center gap-2";
+            }
+        }
+
+        function formatMMSS(secs) {
+            const m = Math.floor(secs / 60);
+            const s = secs % 60;
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        // Live Stat Recording
+        function addLiveStat(statType, amount) {
+            const period = document.getElementById('livePeriod').value;
+            window.liveEventLog.push({ statType, amount, period });
+
+            if (statType === 'G') {
+                window.currentGame.G += amount;
+                window.currentGame.SOG += amount;
+                window.currentGame.teamGoals += amount;
+                addLiveEventFeed(`GOAL scored! (P${period})`);
+            } else if (statType === 'A') {
+                window.currentGame.A += amount;
+                addLiveEventFeed(`Assist recorded (P${period})`);
+            } else if (statType === 'OPP_G') {
+                window.currentGame.oppGoals += amount;
+                addLiveEventFeed(`Opponent goal (P${period})`);
+            } else if (statType === 'FOW') {
+                window.currentGame.FOW += amount;
+                addLiveEventFeed(`Faceoff Won (P${period})`);
+            } else if (statType === 'FOL') {
+                window.currentGame.FOL += amount;
+                addLiveEventFeed(`Faceoff Lost (P${period})`);
+            } else if (statType === 'SOG') {
+                window.currentGame.SOG += amount;
+                addLiveEventFeed(`Shot on Goal (P${period})`);
             } else if (statType === 'HIT') {
                 window.currentGame.HIT += amount;
-                addLiveEventLog(`Body Check (P${period})`);
+                addLiveEventFeed(`Body Check (P${period})`);
             } else if (statType === 'PM') {
-<!-- ... existing code ... -->
+                window.currentGame.PM += amount;
+                addLiveEventFeed(`Plus/Minus ${amount > 0 ? '+1' : '-1'} (P${period})`);
+            } else if (statType === 'PIM') {
+                window.currentGame.PIM += amount;
+                addLiveEventFeed(`Penalty +${amount} PIM (P${period})`);
+            }
+
+            refreshLiveBoxScore();
+            updateLiveScoreDisplay();
+        }
+
+        function undoLastLiveAction() {
+            if (window.liveEventLog.length === 0) return;
+            const last = window.liveEventLog.pop();
+            const { statType, amount } = last;
+
+            if (statType === 'G') {
+                window.currentGame.G = Math.max(0, window.currentGame.G - amount);
+                window.currentGame.SOG = Math.max(0, window.currentGame.SOG - amount);
+                window.currentGame.teamGoals = Math.max(0, window.currentGame.teamGoals - amount);
+            } else if (statType === 'A') {
+                window.currentGame.A = Math.max(0, window.currentGame.A - amount);
+            } else if (statType === 'OPP_G') {
+                window.currentGame.oppGoals = Math.max(0, window.currentGame.oppGoals - amount);
+            } else if (statType === 'FOW') {
+                window.currentGame.FOW = Math.max(0, window.currentGame.FOW - amount);
+            } else if (statType === 'FOL') {
+                window.currentGame.FOL = Math.max(0, window.currentGame.FOL - amount);
+            } else if (statType === 'SOG') {
+                window.currentGame.SOG = Math.max(0, window.currentGame.SOG - amount);
+            } else if (statType === 'HIT') {
+                window.currentGame.HIT = Math.max(0, window.currentGame.HIT - amount);
+            } else if (statType === 'PM') {
+                window.currentGame.PM -= amount;
+            } else if (statType === 'PIM') {
+                window.currentGame.PIM = Math.max(0, window.currentGame.PIM - amount);
+            }
+
+            refreshLiveBoxScore();
+            updateLiveScoreDisplay();
+            const feed = document.getElementById('liveEventFeed');
+            if (feed.firstChild) feed.removeChild(feed.firstChild);
+        }
+
+        function addLiveEventFeed(msg) {
+            const feed = document.getElementById('liveEventFeed');
+            if (feed.querySelector('p.italic')) feed.innerHTML = '';
+            const item = document.createElement('div');
+            item.className = "flex justify-between items-center bg-slate-950/70 px-2 py-0.5 rounded border border-slate-800/80 text-slate-300";
+            item.innerHTML = `<span>• ${msg}</span><span class="text-[9px] text-slate-500">${formatMMSS(window.currentGame.TOISeconds)}</span>`;
+            feed.prepend(item);
+        }
+
+        function refreshLiveBoxScore() {
+            const g = window.currentGame;
+            document.getElementById('liveG').textContent = g.G;
+            document.getElementById('liveA').textContent = g.A;
+            document.getElementById('livePTS').textContent = g.G + g.A;
+            document.getElementById('liveSOG').textContent = g.SOG;
+            document.getElementById('liveFO').textContent = `${g.FOW}-${g.FOL}`;
+            document.getElementById('livePM').textContent = g.PM > 0 ? `+${g.PM}` : g.PM;
+            document.getElementById('livePIM').textContent = g.PIM;
+
+            const totalFO = g.FOW + g.FOL;
+            const foPct = totalFO > 0 ? Math.round((g.FOW / totalFO) * 100) : 0;
+            document.getElementById('foPctDisplay').textContent = `${foPct}% FO`;
+        }
+
+        function updateLiveScoreDisplay() {
+            const oppInput = document.getElementById('liveOpponent').value.trim() || "Opponent";
+            document.getElementById('liveScoreTracker').textContent = `Oil Kings ${window.currentGame.teamGoals} - ${window.currentGame.oppGoals} ${oppInput}`;
+        }
+
+        function confirmFinishGame() {
+            const opp = document.getElementById('liveOpponent').value.trim() || "Opponent";
+            const g = window.currentGame;
+            showCustomDialog(
+                "Finish & Save Game",
+                `Save final game vs ${opp} (${g.G}G, ${g.A}A, ${g.G + g.A} PTS) to the season log?`,
+                () => {
+                    if (isShiftActive) toggleShiftTimer();
+                    const resPrefix = g.teamGoals > g.oppGoals ? "W" : (g.teamGoals < g.oppGoals ? "L" : "T");
+                    const newGame = window.normalizeGameRecord({
+                        id: 'g_' + Date.now(),
+                        season: "2026-27",
+                        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                        opponent: opp,
+                        result: `${resPrefix} (${g.teamGoals}-${g.oppGoals})`,
+                        G: g.G,
+                        A: g.A,
+                        PTS: g.G + g.A,
+                        SOG: g.SOG,
+                        FOW: g.FOW,
+                        FOL: g.FOL,
+                        HIT: g.HIT,
+                        PM: g.PM,
+                        PIM: g.PIM,
+                        TOISeconds: g.TOISeconds
+                    });
+
+                    window.savedGames.unshift(newGame);
+                    saveToStorage();
+
+                    // Reset Live Tracker
+                    window.currentGame = { teamGoals: 0, oppGoals: 0, G: 0, A: 0, SOG: 0, FOW: 0, FOL: 0, HIT: 0, PM: 0, PIM: 0, TOISeconds: 0 };
+                    window.liveEventLog = [];
+                    shiftCount = 0;
+                    document.getElementById('shiftCountDisplay').textContent = "0";
+                    document.getElementById('totalGameTOIDisplay').textContent = "00:00";
+                    document.getElementById('liveOpponent').value = "";
+                    document.getElementById('liveEventFeed').innerHTML = '<p class="italic text-slate-600">Tap buttons above to log live play-by-play...</p>';
+                    refreshLiveBoxScore();
+                    updateLiveScoreDisplay();
+                    updateStatsSummary();
+                    renderHistoryList();
+                    renderStatsTables();
+                    switchTab('history');
+                }
+            );
+        }
+
+        // Player Profile & Photo Upload
+        function toggleEditProfileModal() {
+            const modal = document.getElementById('editProfileModal');
+            if (modal.classList.contains('hidden')) {
+                const p = window.playerProfile;
+                document.getElementById('inputFirstName').value = p.firstName;
+                document.getElementById('inputLastName').value = p.lastName;
+                document.getElementById('inputJersey').value = p.jersey;
+                document.getElementById('inputPos').value = p.position;
+                document.getElementById('inputHeight').value = p.height;
+                document.getElementById('inputWeight').value = p.weight;
+                document.getElementById('inputShoots').value = p.shoots;
+                window.pendingAvatarDataUrl = p.avatarUrl || "";
+                document.getElementById('modalAvatarPreview').src = getAvatarSrc(p);
+                document.getElementById('photoUploadLabel').textContent = "Auto-resized for fast saving";
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function handlePhotoUpload(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            document.getElementById('photoUploadLabel').textContent = "Processing photo...";
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const size = 240;
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+
+                    // Center crop square
+                    const minDim = Math.min(img.width, img.height);
+                    const sx = (img.width - minDim) / 2;
+                    const sy = (img.height - minDim) / 2;
+                    ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    window.pendingAvatarDataUrl = compressedDataUrl;
+                    document.getElementById('modalAvatarPreview').src = compressedDataUrl;
+                    document.getElementById('photoUploadLabel').textContent = "Photo ready! Tap Save Profile";
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function savePlayerProfile() {
+            window.playerProfile = window.normalizePlayerProfile({
+                firstName: document.getElementById('inputFirstName').value.trim() || "Darren",
+                lastName: document.getElementById('inputLastName').value.trim() || "Son",
+                jersey: document.getElementById('inputJersey').value.trim() || "44",
+                position: document.getElementById('inputPos').value,
+                height: document.getElementById('inputHeight').value.trim() || "5'6\"",
+                weight: document.getElementById('inputWeight').value.trim() || "140 lbs",
+                shoots: document.getElementById('inputShoots').value,
+                avatarUrl: window.pendingAvatarDataUrl
+            });
+            saveToStorage();
+            updatePlayerHeaderDisplay();
+            toggleEditProfileModal();
+        }
+
+        function getAvatarSrc(p) {
+            if (p.avatarUrl && p.avatarUrl.startsWith('data:image')) return p.avatarUrl;
+            const fullName = encodeURIComponent(`${p.firstName} ${p.lastName}`);
+            return `https://ui-avatars.com/api/?name=${fullName}&background=1B4D3E&color=D4AF37&size=128&bold=true`;
+        }
+
+        window.updatePlayerHeaderDisplay = function() {
+            const p = window.playerProfile;
+            document.getElementById('playerNameDisplay').textContent = `${p.firstName} ${p.lastName}`;
+            document.getElementById('jerseyBadge').textContent = `#${p.jersey}`;
+            document.getElementById('playerPosDisplay').textContent = p.position;
+            document.getElementById('playerHeightDisplay').textContent = p.height;
+            document.getElementById('playerWeightDisplay').textContent = p.weight;
+            document.getElementById('playerShootsDisplay').textContent = p.shoots;
+            document.getElementById('playerAvatar').src = getAvatarSrc(p);
+        };
+
+        // Past Game & Edit Game Modal
+        function openAddPastGameModal() {
+            document.getElementById('gameModalTitle').textContent = "Add Past Game";
+            document.getElementById('editingGameId').value = "";
+            document.getElementById('modalGameDate').value = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            document.getElementById('modalGameSeason').value = "2026-27";
+            document.getElementById('modalOpponent').value = "";
+            document.getElementById('modalResult').value = "W (4-2)";
+            document.getElementById('modalG').value = 0;
+            document.getElementById('modalA').value = 0;
+            document.getElementById('modalSOG').value = 0;
+            document.getElementById('modalPM').value = 0;
+            document.getElementById('modalFOW').value = 0;
+            document.getElementById('modalFOL').value = 0;
+            document.getElementById('modalHIT').value = 0;
+            document.getElementById('modalPIM').value = 0;
+            document.getElementById('modalTOIMins').value = 15;
+            document.getElementById('gameEditorModal').classList.remove('hidden');
+        }
+
+        function openEditGameModal(id) {
+            const g = window.savedGames.find(item => item.id === id);
+            if (!g) return;
+            document.getElementById('gameModalTitle').textContent = "Edit Game Stats";
+            document.getElementById('editingGameId').value = g.id;
+            document.getElementById('modalGameDate').value = g.date;
+            document.getElementById('modalGameSeason').value = g.season;
+            document.getElementById('modalOpponent').value = g.opponent;
+            document.getElementById('modalResult').value = g.result;
+            document.getElementById('modalG').value = g.G;
+            document.getElementById('modalA').value = g.A;
+            document.getElementById('modalSOG').value = g.SOG;
+            document.getElementById('modalPM').value = g.PM;
+            document.getElementById('modalFOW').value = g.FOW;
+            document.getElementById('modalFOL').value = g.FOL;
+            document.getElementById('modalHIT').value = g.HIT;
+            document.getElementById('modalPIM').value = g.PIM;
+            document.getElementById('modalTOIMins').value = Math.round(g.TOISeconds / 60);
+            document.getElementById('gameEditorModal').classList.remove('hidden');
+        }
+
+        function closeGameEditorModal() {
+            document.getElementById('gameEditorModal').classList.add('hidden');
+        }
+
+        function saveEditedGame() {
+            const existingId = document.getElementById('editingGameId').value;
+            const gVal = parseInt(document.getElementById('modalG').value) || 0;
+            const aVal = parseInt(document.getElementById('modalA').value) || 0;
+            const toiMins = parseInt(document.getElementById('modalTOIMins').value) || 0;
+
+            const record = window.normalizeGameRecord({
+                id: existingId || ('g_' + Date.now()),
+                date: document.getElementById('modalGameDate').value.trim() || "Oct 28, 2026",
+                season: document.getElementById('modalGameSeason').value,
+                opponent: document.getElementById('modalOpponent').value.trim() || "Opponent",
+                result: document.getElementById('modalResult').value.trim() || "W",
+                G: gVal,
+                A: aVal,
+                PTS: gVal + aVal,
+                SOG: parseInt(document.getElementById('modalSOG').value) || 0,
+                PM: parseInt(document.getElementById('modalPM').value) || 0,
+                FOW: parseInt(document.getElementById('modalFOW').value) || 0,
+                FOL: parseInt(document.getElementById('modalFOL').value) || 0,
+                HIT: parseInt(document.getElementById('modalHIT').value) || 0,
+                PIM: parseInt(document.getElementById('modalPIM').value) || 0,
+                TOISeconds: toiMins * 60
+            });
+
+            if (existingId) {
+                const idx = window.savedGames.findIndex(item => item.id === existingId);
+                if (idx !== -1) window.savedGames[idx] = record;
+            } else {
+                window.savedGames.unshift(record);
+            }
+
+            saveToStorage();
+            updateStatsSummary();
+            renderHistoryList();
+            renderStatsTables();
+            closeGameEditorModal();
+        }
+
+        function deleteGame(id) {
+            showCustomDialog(
+                "Delete Game",
+                "Are you sure you want to remove this game from the season log?",
+                () => {
+                    window.savedGames = window.savedGames.filter(g => g.id !== id);
+                    saveToStorage();
+                    updateStatsSummary();
+                    renderHistoryList();
+                    renderStatsTables();
+                }
+            );
+        }
+
+        // Render History & Stats
+        window.updateStatsSummary = function() {
+            const seasonGames = window.savedGames.filter(g => g.season === "2026-27");
+            const gp = seasonGames.length;
+            const g = seasonGames.reduce((sum, item) => sum + item.G, 0);
+            const a = seasonGames.reduce((sum, item) => sum + item.A, 0);
+            const pm = seasonGames.reduce((sum, item) => sum + item.PM, 0);
+
+            document.getElementById('headerGP').textContent = gp;
+            document.getElementById('headerG').textContent = g;
+            document.getElementById('headerA').textContent = a;
+            document.getElementById('headerPTS').textContent = g + a;
+            document.getElementById('headerPM').textContent = pm > 0 ? `+${pm}` : pm;
+        };
+
+        window.renderHistoryList = function() {
+            const list = document.getElementById('gameHistoryList');
+            if (window.savedGames.length === 0) {
+                list.innerHTML = '<div class="bg-slate-900 border border-slate-800 rounded-xl p-6 text-center text-xs text-slate-400">No games logged yet. Start a Live Game or tap "+ Past Game".</div>';
+                return;
+            }
+
+            list.innerHTML = window.savedGames.map(g => {
+                const isWin = g.result.toUpperCase().startsWith('W');
+                const badgeClass = isWin ? 'bg-emerald-950 text-emerald-400 border-emerald-700' : 'bg-slate-800 text-slate-300 border-slate-700';
+                return `
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-black text-white text-xs">vs ${g.opponent}</span>
+                                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${badgeClass}">${g.result}</span>
+                                </div>
+                                <span class="text-[10px] text-slate-400 block mt-0.5">${g.date} • ${g.season} • TOI ${formatMMSS(g.TOISeconds)}</span>
+                            </div>
+                            <div class="flex gap-1.5">
+                                <button onclick="openEditGameModal('${g.id}')" class="text-xs bg-slate-800 hover:bg-slate-700 text-oilGold p-1.5 rounded-lg border border-slate-700"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteGame('${g.id}')" class="text-xs bg-slate-800 hover:bg-rose-900 text-rose-400 p-1.5 rounded-lg border border-slate-700"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-6 gap-1 text-center bg-slate-950 rounded-lg py-1.5 border border-slate-800/80 text-[10px]">
+                            <div><span class="text-slate-500 block">G</span><strong class="text-emerald-400">${g.G}</strong></div>
+                            <div><span class="text-slate-500 block">A</span><strong class="text-blue-400">${g.A}</strong></div>
+                            <div><span class="text-slate-500 block">PTS</span><strong class="text-oilGold">${g.PTS}</strong></div>
+                            <div><span class="text-slate-500 block">SOG</span><strong class="text-white">${g.SOG}</strong></div>
+                            <div><span class="text-slate-500 block">FO</span><strong class="text-white">${g.FOW}-${g.FOL}</strong></div>
+                            <div><span class="text-slate-500 block">+/-</span><strong class="text-white">${g.PM > 0 ? '+' + g.PM : g.PM}</strong></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        window.renderStatsTables = function() {
+            const filter = document.getElementById('seasonFilter').value;
+            const filtered = filter === 'ALL' ? window.savedGames : window.savedGames.filter(g => g.season === filter);
+
+            const gp = filtered.length;
+            const g = filtered.reduce((s, x) => s + x.G, 0);
+            const a = filtered.reduce((s, x) => s + x.A, 0);
+            const pts = g + a;
+            const sog = filtered.reduce((s, x) => s + x.SOG, 0);
+            const fow = filtered.reduce((s, x) => s + x.FOW, 0);
+            const fol = filtered.reduce((s, x) => s + x.FOL, 0);
+
+            document.getElementById('statPPG').textContent = gp > 0 ? (pts / gp).toFixed(2) : "0.00";
+            document.getElementById('statShPct').textContent = sog > 0 ? ((g / sog) * 100).toFixed(1) + "%" : "0.0%";
+            document.getElementById('statFOPct').textContent = (fow + fol) > 0 ? ((fow / (fow + fol)) * 100).toFixed(1) + "%" : "0.0%";
+
+            const seasons = ["2026-27", "2025-26"];
+            const tbody = document.getElementById('careerStatsBody');
+            tbody.innerHTML = seasons.map(s => {
+                const list = window.savedGames.filter(x => x.season === s);
+                const sGP = list.length;
+                const sG = list.reduce((sum, x) => sum + x.G, 0);
+                const sA = list.reduce((sum, x) => sum + x.A, 0);
+                const sSOG = list.reduce((sum, x) => sum + x.SOG, 0);
+                const sFOW = list.reduce((sum, x) => sum + x.FOW, 0);
+                const sFOL = list.reduce((sum, x) => sum + x.FOL, 0);
+                const sPIM = list.reduce((sum, x) => sum + x.PIM, 0);
+                const foPct = (sFOW + sFOL) > 0 ? Math.round((sFOW / (sFOW + sFOL)) * 100) + "%" : "-";
+
+                return `
+                    <tr>
+                        <td class="p-2 text-white font-bold">${s}</td>
+                        <td class="p-2 text-center">${sGP}</td>
+                        <td class="p-2 text-center text-emerald-400">${sG}</td>
+                        <td class="p-2 text-center text-blue-400">${sA}</td>
+                        <td class="p-2 text-center text-oilGold font-black">${sG + sA}</td>
+                        <td class="p-2 text-center">${sSOG}</td>
+                        <td class="p-2 text-center">${foPct}</td>
+                        <td class="p-2 text-center text-amber-400">${sPIM}</td>
+                    </tr>
+                `;
+            }).join('');
+        };
+
+        // SMS Recap Generator
+        function prepareSMS(stageLabel) {
+            const p = window.playerProfile;
+            const g = window.currentGame;
+            const opp = document.getElementById('liveOpponent').value.trim() || "Opponent";
+            const totalFO = g.FOW + g.FOL;
+            const foStr = totalFO > 0 ? `${g.FOW}/${totalFO} (${Math.round((g.FOW / totalFO) * 100)}%)` : "0/0";
+
+            const lines = [
+                `🏒 SWZ Oil Kings — ${stageLabel}`,
+                `Score: Oil Kings ${g.teamGoals} - ${g.oppGoals} ${opp}`,
+                ``,
+                `#${p.jersey} ${p.firstName}'s Game Stats:`,
+                `• ${g.G}G, ${g.A}A (${g.G + g.A} PTS)`
+            ];
+
+            if (window.buttonSettings.SOG) lines.push(`• ${g.SOG} Shots on Goal`);
+            if (window.buttonSettings.FO) lines.push(`• Faceoffs: ${foStr}`);
+            if (window.buttonSettings.HIT) lines.push(`• Body Checks: ${g.HIT}`);
+            if (window.buttonSettings.PM) lines.push(`• Plus/Minus: ${g.PM > 0 ? '+' + g.PM : g.PM}`);
+            if (window.buttonSettings.shiftTimer) lines.push(`• Ice Time: ${formatMMSS(g.TOISeconds)}`);
+
+            document.getElementById('smsPreviewBox').value = lines.join('\n');
+        }
+
+        function launchPixelSMS() {
+            const text = document.getElementById('smsPreviewBox').value;
+            window.location.href = `sms:?body=${encodeURIComponent(text)}`;
+        }
+
+        // LocalStorage & Sample Data
         function saveToStorage() {
             try {
                 localStorage.setItem('swz_playerProfile', JSON.stringify(window.playerProfile));
@@ -289,7 +1364,6 @@
             } catch (e) {
                 console.warn("localStorage write failed:", e);
             }
-            // Non-blocking background sync to Firestore
             if (window.cloudSync && typeof window.cloudSync.pushToCloud === 'function') {
                 window.cloudSync.pushToCloud();
             }
@@ -298,27 +1372,44 @@
         function loadFromStorage() {
             try {
                 const profRaw = localStorage.getItem('swz_playerProfile');
-                if (profRaw) {
-                    window.playerProfile = window.normalizePlayerProfile(JSON.parse(profRaw));
-                }
+                if (profRaw) window.playerProfile = window.normalizePlayerProfile(JSON.parse(profRaw));
 
-                const btnSettingsRaw = localStorage.getItem('swz_buttonSettings');
-                if (btnSettingsRaw) {
-                    window.buttonSettings = window.normalizeButtonSettings(JSON.parse(btnSettingsRaw));
-                }
+                const btnRaw = localStorage.getItem('swz_buttonSettings');
+                if (btnRaw) window.buttonSettings = window.normalizeButtonSettings(JSON.parse(btnRaw));
 
                 const gamesRaw = localStorage.getItem('swz_savedGames');
                 if (gamesRaw) {
                     const parsed = JSON.parse(gamesRaw);
-                    if (Array.isArray(parsed)) {
-                        window.savedGames = parsed.map(window.normalizeGameRecord);
-                    }
+                    if (Array.isArray(parsed)) window.savedGames = parsed.map(window.normalizeGameRecord);
                 }
             } catch (e) {
-                console.warn("Error parsing local storage, falling back to clean defaults:", e);
                 window.playerProfile = window.normalizePlayerProfile({});
                 window.buttonSettings = window.normalizeButtonSettings({});
                 window.savedGames = [];
             }
         }
-<!-- ... existing code ... -->
+
+        function populateSampleDataIfEmpty() {
+            if (window.savedGames.length > 0) return;
+            window.savedGames = [
+                window.normalizeGameRecord({
+                    id: 'sample_1',
+                    season: '2026-27',
+                    date: 'Oct 28, 2026',
+                    opponent: 'KC Knights',
+                    result: 'W (4-2)',
+                    G: 2, A: 1, PTS: 3, SOG: 5, FOW: 8, FOL: 4, HIT: 0, PM: 2, PIM: 0, TOISeconds: 1040
+                }),
+                window.normalizeGameRecord({
+                    id: 'sample_2',
+                    season: '2026-27',
+                    date: 'Oct 21, 2026',
+                    opponent: 'Whitemud West',
+                    result: 'W (3-1)',
+                    G: 1, A: 1, PTS: 2, SOG: 4, FOW: 6, FOL: 5, HIT: 0, PM: 1, PIM: 2, TOISeconds: 980
+                })
+            ];
+        }
+    </script>
+</body>
+</html>
