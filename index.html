@@ -88,7 +88,7 @@
                 </div>
             </div>
 
-            <!-- NHL Quick Season Summary Strip -->
+            <!-- Quick Season Summary Strip -->
             <div class="grid grid-cols-5 bg-slate-900/90 border-t border-slate-800 py-2 px-1 text-center">
                 <div>
                     <span class="text-[9px] text-slate-400 font-bold uppercase block">GP</span>
@@ -355,7 +355,7 @@
                 </div>
             </section>
 
-            <!-- ================= TAB 3: NHL SEASON & CAREER STATS ================= -->
+            <!-- ================= TAB 3: SEASON & CAREER STATS ================= -->
             <section id="view-stats" class="hidden space-y-3">
                 <div class="flex justify-between items-center gap-2">
                     <h2 class="text-xs font-black uppercase text-slate-300 tracking-wider">Season Breakdown</h2>
@@ -418,7 +418,7 @@
             <section id="view-sms" class="hidden space-y-3">
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 space-y-2.5">
                     <h2 class="text-xs font-black uppercase text-oilGold">Intermission & Game SMS Recap</h2>
-                    <p class="text-[11px] text-slate-400">Tap a button below to open your Pixel Messages app pre-filled with your son's game stats.</p>
+                    <p class="text-[11px] text-slate-400">Tap a button below to open your Messages app pre-filled with your son's game stats.</p>
 
                     <div class="grid grid-cols-3 gap-1.5">
                         <button type="button" onclick="prepareSMS('End of 1st Period')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold py-2 rounded-lg text-[11px]">End of P1</button>
@@ -731,7 +731,7 @@
         </div>
     </div>
 
-    <!-- FIREBASE CLOUD SYNC MODULE (Ready when MANUAL_FIREBASE_CONFIG is added) -->
+    <!-- FIREBASE CLOUD SYNC MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -974,7 +974,7 @@
             OPP_G: true,
             FO: true,
             SOG: true,
-            HIT: false, // Disabled by default for non-contact leagues
+            HIT: false,
             PIM: true
         };
 
@@ -1044,12 +1044,12 @@
         window.seasonOverrides = {};
         window.liveEventLog = [];
         window.pendingAvatarDataUrl = "";
-        window.strengthMode = "EV"; // "EV", "PP", or "SH"
+        window.strengthMode = "EV";
 
         window.activePenalties = {
-            tom: [],   // array of penalty minute durations (e.g. [2])
-            team: [],  // array of penalty minute durations
-            opp: []    // array of penalty minute durations
+            tom: [],
+            team: [],
+            opp: []
         };
 
         window.currentGame = {
@@ -1078,17 +1078,22 @@
         let shiftCount = 0;
 
         window.onload = function() {
-            loadFromStorage();
-            populateSampleDataIfEmpty();
-            setStrengthMode(window.strengthMode);
-            syncPenaltyUI();
-            applyButtonSettings();
-            updatePlayerHeaderDisplay();
-            updateStatsSummary();
-            renderHistoryList();
-            renderStatsTables();
-            updateLiveScoreDisplay();
-            syncShiftTimerUI();
+            try {
+                loadFromStorage();
+                populateSampleDataIfEmpty();
+                setStrengthMode(window.strengthMode);
+                syncPenaltyUI();
+                applyButtonSettings();
+                updatePlayerHeaderDisplay();
+                updateStatsSummary();
+                renderHistoryList();
+                renderStatsTables();
+                syncSMSPastSeasonOptions();
+                updateLiveScoreDisplay();
+                syncShiftTimerUI();
+            } catch (err) {
+                console.warn("Startup error recovered:", err);
+            }
         };
 
         // Tab Navigation
@@ -1631,7 +1636,6 @@
                     window.savedGames.unshift(newGame);
                     saveToStorage();
 
-                    // Reset Live Tracker & Penalties
                     window.currentGame = { teamGoals: 0, oppGoals: 0, G: 0, A: 0, PPG: 0, PPA: 0, SHG: 0, SHA: 0, SOG: 0, FOW: 0, FOL: 0, HIT: 0, PM: 0, PIM: 0, TOISeconds: 0 };
                     window.liveEventLog = [];
                     window.activePenalties = { tom: [], team: [], opp: [] };
@@ -1961,6 +1965,7 @@
 
             saveToStorage();
             renderStatsTables();
+            syncSMSPastSeasonOptions();
             closeSeasonEditorModal();
         }
 
