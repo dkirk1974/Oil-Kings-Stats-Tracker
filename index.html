@@ -500,7 +500,7 @@
             <div class="grid grid-cols-2 gap-2">
                 <div>
                     <label class="text-[10px] text-slate-400 font-bold uppercase block">Date</label>
-                    <input type="text" id="modalGameDate" placeholder="Nov 15, 2026" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                    <input type="date" id="modalGameDate" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
                 </div>
                 <div>
                     <label class="text-[10px] text-slate-400 font-bold uppercase block">Season</label>
@@ -1316,10 +1316,44 @@
         };
 
         // Past Game & Edit Game Modal
+        function toDateInputValue(dateStr) {
+            const parsed = new Date(dateStr);
+            if (!Number.isNaN(parsed.getTime())) {
+                const year = parsed.getFullYear();
+                const month = String(parsed.getMonth() + 1).padStart(2, '0');
+                const day = String(parsed.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDisplayDate(dateStr) {
+            // Parse YYYY-MM-DD in local time so calendar day never shifts by timezone
+            const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dateStr || '').trim());
+            const dateObj = match
+                ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+                : new Date(dateStr);
+            if (Number.isNaN(dateObj.getTime())) return String(dateStr || "Oct 28, 2026");
+            return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function getGameSortTimestamp(game) {
+            const ts = Date.parse(game?.date || '');
+            return Number.isNaN(ts) ? 0 : ts;
+        }
+
+        function sortGamesDescending() {
+            window.savedGames.sort((a, b) => getGameSortTimestamp(b) - getGameSortTimestamp(a));
+        }
+
         function openAddPastGameModal() {
             document.getElementById('gameModalTitle').textContent = "Add Past Game";
             document.getElementById('editingGameId').value = "";
-            document.getElementById('modalGameDate').value = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            document.getElementById('modalGameDate').value = toDateInputValue(new Date());
             document.getElementById('modalGameSeason').value = "2026-27";
             document.getElementById('modalOpponent').value = "";
             document.getElementById('modalResult').value = "W (4-2)";
@@ -1340,7 +1374,7 @@
             if (!g) return;
             document.getElementById('gameModalTitle').textContent = "Edit Game Stats";
             document.getElementById('editingGameId').value = g.id;
-            document.getElementById('modalGameDate').value = g.date;
+            document.getElementById('modalGameDate').value = toDateInputValue(g.date);
             document.getElementById('modalGameSeason').value = g.season;
             document.getElementById('modalOpponent').value = g.opponent;
             document.getElementById('modalResult').value = g.result;
@@ -1365,10 +1399,11 @@
             const gVal = parseInt(document.getElementById('modalG').value) || 0;
             const aVal = parseInt(document.getElementById('modalA').value) || 0;
             const toiMins = parseInt(document.getElementById('modalTOIMins').value) || 0;
+            const rawDate = document.getElementById('modalGameDate').value;
 
             const record = window.normalizeGameRecord({
                 id: existingId || ('g_' + Date.now()),
-                date: document.getElementById('modalGameDate').value.trim() || "Oct 28, 2026",
+                date: formatDisplayDate(rawDate),
                 season: document.getElementById('modalGameSeason').value,
                 opponent: document.getElementById('modalOpponent').value.trim() || "Opponent",
                 result: document.getElementById('modalResult').value.trim() || "W",
@@ -1388,9 +1423,10 @@
                 const idx = window.savedGames.findIndex(item => item.id === existingId);
                 if (idx !== -1) window.savedGames[idx] = record;
             } else {
-                window.savedGames.unshift(record);
+                window.savedGames.push(record);
             }
 
+            sortGamesDescending();
             saveToStorage();
             updateStatsSummary();
             renderHistoryList();
@@ -1428,6 +1464,7 @@
         };
 
         window.renderHistoryList = function() {
+            sortGamesDescending();
             const list = document.getElementById('gameHistoryList');
             if (window.savedGames.length === 0) {
                 list.innerHTML = '<div class="bg-slate-900 border border-slate-800 rounded-xl p-6 text-center text-xs text-slate-400">No games logged yet. Start a Live Game or tap "+ Past Game".</div>';
@@ -1566,6 +1603,7 @@
                     const parsed = JSON.parse(gamesRaw);
                     if (Array.isArray(parsed)) window.savedGames = parsed.map(window.normalizeGameRecord);
                 }
+                sortGamesDescending();
             } catch (e) {
                 window.playerProfile = window.normalizePlayerProfile({});
                 window.buttonSettings = window.normalizeButtonSettings({});
@@ -1593,6 +1631,7 @@
                     G: 1, A: 1, PTS: 2, SOG: 4, FOW: 6, FOL: 5, HIT: 0, PM: 1, PIM: 2, TOISeconds: 980
                 })
             ];
+            sortGamesDescending();
         }
     </script>
 </body>
