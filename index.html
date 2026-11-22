@@ -546,24 +546,38 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Cloud Sync Bridge attached to window so UI buttons never block on network
+        // =========================================================================
+        // PASTE YOUR FIREBASE CONFIG FROM YOUR GIN RUMMY APP BELOW FOR GITHUB PAGES:
+        // Example: const MANUAL_FIREBASE_CONFIG = { apiKey: "...", authDomain: "...", projectId: "...", ... };
+        // =========================================================================
+        const MANUAL_FIREBASE_CONFIG = null;
+
+        // Shared Public Cloud Sync Bridge (Everyone with the URL sees live updates)
         window.cloudSync = {
             db: null,
             user: null,
             appId: typeof __app_id !== 'undefined' ? __app_id : 'swz-oil-kings-tracker',
             isReady: false,
+            unsubscribe: null,
+
+            getSharedDocRef() {
+                return doc(this.db, 'artifacts', this.appId, 'public', 'data', 'hockeyTracker', 'sharedState');
+            },
 
             async init() {
                 try {
-                    const configStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
-                    if (!configStr) {
-                        this.updateBadge("Local Mode", "text-slate-400");
+                    let firebaseConfig = MANUAL_FIREBASE_CONFIG;
+                    if (!firebaseConfig && typeof __firebase_config !== 'undefined' && __firebase_config) {
+                        firebaseConfig = JSON.parse(__firebase_config);
+                    }
+
+                    if (!firebaseConfig || !firebaseConfig.apiKey) {
+                        this.updateBadge("Local Mode (Add Firebase Config)", "text-amber-400");
                         return;
                     }
 
-                    const firebaseConfig = JSON.parse(configStr);
                     const app = initializeApp(firebaseConfig);
                     const auth = getAuth(app);
                     this.db = getFirestore(app);
@@ -576,9 +590,11 @@
                         this.user = cred.user;
                     }
 
+                    if (!this.user) return;
+
                     this.isReady = true;
-                    this.updateBadge("Cloud Synced", "text-emerald-400");
-                    await this.pullFromCloud();
+                    this.updateBadge("Cloud Live", "text-emerald-400");
+                    this.subscribeToSharedState();
                 } catch (err) {
                     console.warn("Firebase init skipped/offline:", err);
                     this.updateBadge("Offline Mode", "text-amber-400");
@@ -593,11 +609,11 @@
                 }
             },
 
-            async pullFromCloud() {
+            subscribeToSharedState() {
                 if (!this.isReady || !this.user || !this.db) return;
-                try {
-                    const stateDocRef = doc(this.db, 'artifacts', this.appId, 'users', this.user.uid, 'hockeyData', 'mainState');
-                    const snap = await getDoc(stateDocRef);
+                const stateDocRef = this.getSharedDocRef();
+
+                this.unsubscribe = onSnapshot(stateDocRef, (snap) => {
                     if (snap.exists()) {
                         const cloudData = snap.data();
                         if (cloudData.playerProfile) {
@@ -607,33 +623,37 @@
                             window.savedGames = cloudData.savedGames.map(window.normalizeGameRecord);
                         }
                         // Cache fresh cloud pull locally and refresh UI
-                        localStorage.setItem('swz_playerProfile', JSON.stringify(window.playerProfile));
-                        localStorage.setItem('swz_savedGames', JSON.stringify(window.savedGames));
-                        
+                        try {
+                            localStorage.setItem('swz_playerProfile', JSON.stringify(window.playerProfile));
+                            localStorage.setItem('swz_savedGames', JSON.stringify(window.savedGames));
+                        } catch (e) {}
+
                         window.updatePlayerHeaderDisplay();
                         window.updateStatsSummary();
                         window.renderHistoryList();
                         window.renderStatsTables();
+                        this.updateBadge("Cloud Live", "text-emerald-400");
                     } else {
                         // First time cloud setup: push existing local data up
-                        await this.pushToCloud();
+                        this.pushToCloud();
                     }
-                } catch (err) {
-                    console.warn("Background cloud pull failed:", err);
-                }
+                }, (err) => {
+                    console.warn("Realtime cloud listener error:", err);
+                    this.updateBadge("Saved Locally", "text-amber-400");
+                });
             },
 
             async pushToCloud() {
                 if (!this.isReady || !this.user || !this.db) return;
                 try {
                     this.updateBadge("Syncing...", "text-oilGold");
-                    const stateDocRef = doc(this.db, 'artifacts', this.appId, 'users', this.user.uid, 'hockeyData', 'mainState');
+                    const stateDocRef = this.getSharedDocRef();
                     await setDoc(stateDocRef, {
                         playerProfile: window.playerProfile,
                         savedGames: window.savedGames,
                         updatedAt: new Date().toISOString()
                     });
-                    this.updateBadge("Cloud Synced", "text-emerald-400");
+                    this.updateBadge("Cloud Live", "text-emerald-400");
                 } catch (err) {
                     console.warn("Cloud save error (data safely in localStorage):", err);
                     this.updateBadge("Saved Locally", "text-amber-400");
