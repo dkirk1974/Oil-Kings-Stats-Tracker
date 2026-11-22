@@ -159,13 +159,13 @@
                             <span id="strengthHint" class="text-[9px] text-oilGold font-semibold">EV: Goal +1 / Opp -1</span>
                         </div>
                         <div class="grid grid-cols-3 gap-1.5">
-                            <button type="button" id="strength-EV" onclick="setStrengthMode('EV')" class="py-1.5 px-2 rounded-lg text-[11px] font-black bg-oilGreen border border-oilGold text-oilGold transition">
+                            <button type="button" id="top-strength-EV" onclick="setStrengthMode('EV')" class="py-1.5 px-2 rounded-lg text-[11px] font-black bg-oilGreen border border-oilGold text-oilGold transition">
                                 Even (EV)
                             </button>
-                            <button type="button" id="strength-PP" onclick="setStrengthMode('PP')" class="py-1.5 px-2 rounded-lg text-[11px] font-black bg-slate-950 border border-slate-700 text-slate-300 hover:border-slate-500 transition">
+                            <button type="button" id="top-strength-PP" onclick="setStrengthMode('PP')" class="py-1.5 px-2 rounded-lg text-[11px] font-black bg-slate-950 border border-slate-700 text-slate-300 hover:border-slate-500 transition">
                                 Power Play (PP)
                             </button>
-                            <button type="button" id="strength-SH" onclick="setStrengthMode('SH')" class="py-1.5 px-2 rounded-lg text-[11px] font-black bg-slate-950 border border-slate-700 text-slate-300 hover:border-slate-500 transition">
+                            <button type="button" id="top-strength-SH" onclick="setStrengthMode('SH')" class="py-1.5 px-2 rounded-lg text-[11px] font-black bg-slate-950 border border-slate-700 text-slate-300 hover:border-slate-500 transition">
                                 Shorthanded (SH)
                             </button>
                         </div>
@@ -199,13 +199,13 @@
                         <span id="strengthRuleHint" class="text-[9px] font-bold text-oilGold">EV: GF +1 / GA -1</span>
                     </div>
                     <div class="grid grid-cols-3 gap-1.5">
-                        <button type="button" id="strength-EV" onclick="setStrengthMode('EV')" class="bg-oilGreen border border-oilGold text-oilGold font-black py-1.5 rounded-lg text-xs active:scale-95 transition">
+                        <button type="button" id="pm-strength-EV" onclick="setStrengthMode('EV')" class="bg-oilGreen border border-oilGold text-oilGold font-black py-1.5 rounded-lg text-xs active:scale-95 transition">
                             Even (EV)
                         </button>
-                        <button type="button" id="strength-PP" onclick="setStrengthMode('PP')" class="bg-slate-800 border border-slate-700 text-slate-300 font-bold py-1.5 rounded-lg text-xs active:scale-95 transition">
+                        <button type="button" id="pm-strength-PP" onclick="setStrengthMode('PP')" class="bg-slate-800 border border-slate-700 text-slate-300 font-bold py-1.5 rounded-lg text-xs active:scale-95 transition">
                             Power Play (PP)
                         </button>
-                        <button type="button" id="strength-SH" onclick="setStrengthMode('SH')" class="bg-slate-800 border border-slate-700 text-slate-300 font-bold py-1.5 rounded-lg text-xs active:scale-95 transition">
+                        <button type="button" id="pm-strength-SH" onclick="setStrengthMode('SH')" class="bg-slate-800 border border-slate-700 text-slate-300 font-bold py-1.5 rounded-lg text-xs active:scale-95 transition">
                             Shorthanded (SH)
                         </button>
                     </div>
@@ -804,7 +804,7 @@
         let isShiftStopped = false;
         let currentShiftSeconds = 0;
         let shiftCount = 0;
-        let currentStrength = 'EV';
+
         window.onload = function() {
             loadFromStorage();
             populateSampleDataIfEmpty();
@@ -906,35 +906,45 @@
             window.strengthMode = ['EV', 'PP', 'SH'].includes(mode) ? mode : 'EV';
 
             ['EV', 'PP', 'SH'].forEach(m => {
-                const btn = document.getElementById(`strength-${m}`);
-                if (!btn) return;
-                if (m === window.strengthMode) {
-                    btn.className = "py-1.5 px-2 rounded-lg text-[11px] font-black bg-oilGreen border border-oilGold text-oilGold transition";
-                } else {
-                    btn.className = "py-1.5 px-2 rounded-lg text-[11px] font-black bg-slate-950 border border-slate-700 text-slate-300 hover:border-slate-500 transition";
-                }
+                const topBtn = document.getElementById(`top-strength-${m}`);
+                const pmBtn = document.getElementById(`pm-strength-${m}`);
+                [topBtn, pmBtn].forEach(btn => {
+                    if (!btn) return;
+                    if (m === window.strengthMode) {
+                        btn.className = "py-1.5 px-2 rounded-lg text-[11px] font-black bg-oilGreen border border-oilGold text-oilGold transition";
+                    } else {
+                        btn.className = "py-1.5 px-2 rounded-lg text-[11px] font-black bg-slate-950 border border-slate-700 text-slate-300 hover:border-slate-500 transition";
+                    }
+                });
             });
 
             const hintEl = document.getElementById('strengthHint');
+            const ruleHintEl = document.getElementById('strengthRuleHint');
             const goalSub = document.getElementById('goalSubLabel');
             const assistSub = document.getElementById('assistSubLabel');
             const oppSub = document.getElementById('oppGoalSubLabel');
 
             if (window.strengthMode === 'EV') {
-                hintEl.textContent = "EV: Goal/A +1 +/- | Opp -1 +/-";
-                goalSub.textContent = "+1G, +1 PTS, +1 SOG, +1 +/-";
-                assistSub.textContent = "+1A, +1 PTS, +1 +/-";
-                oppSub.textContent = "-1 +/- (when on ice)";
+                if (hintEl) hintEl.textContent = "EV: Goal/A +1 +/- | Opp -1 +/-";
+                if (ruleHintEl) ruleHintEl.textContent = "EV: GF +1 / GA -1";
+                if (goalSub) goalSub.textContent = "+1G, +1 PTS, +1 SOG, +1 +/-";
+                if (assistSub) assistSub.textContent = "+1A, +1 PTS, +1 +/-";
+                if (oppSub) oppSub.textContent = "-1 +/- (when on ice)";
             } else if (window.strengthMode === 'PP') {
-                hintEl.textContent = "PP: Goal/A 0 +/- | SH Goal Against -1 +/-";
-                goalSub.textContent = "+1G, +1 PTS, +1 SOG, 0 +/- (PP)";
-                assistSub.textContent = "+1A, +1 PTS, 0 +/- (PP)";
-                oppSub.textContent = "-1 +/- (shorthanded goal against)";
+                if (hintEl) hintEl.textContent = "PP: Goal/A 0 +/- | SH Goal Against -1 +/-";
+                if (ruleHintEl) ruleHintEl.textContent = "PP: GF 0 / SHG Against -1";
+                if (goalSub) goalSub.textContent = "+1G, +1 PTS, +1 SOG, 0 +/- (PP)";
+                if (assistSub) assistSub.textContent = "+1A, +1 PTS, 0 +/- (PP)";
+                if (oppSub) oppSub.textContent = "-1 +/- (shorthanded goal against)";
             } else {
-                hintEl.textContent = "SH: SH Goal/A +1 +/- | Goal Against 0 +/-";
-                goalSub.textContent = "+1G, +1 PTS, +1 SOG, +1 +/- (SH)";
-                assistSub.textContent = "+1A, +1 PTS, +1 +/- (SH)";
-                oppSub.textContent = "0 +/- (no -1 on penalty kill)";
+                if (hintEl) hintEl.textContent = "SH: SH Goal/A +1 +/- | Goal Against 0 +/-";
+                if (ruleHintEl) ruleHintEl.textContent = "SH: SHG For +1 / GA 0";
+                if (goalSub) goalSub.textContent = "+1G, +1 PTS, +1 SOG, +1 +/- (SH)";
+                if (assistSub) assistSub.textContent = "+1A, +1 PTS, +1 +/- (SH)";
+                if (oppSub) oppSub.textContent = "0 +/- (no -1 on penalty kill)";
+            }
+        }
+
         // Shift Timer Controls
         function syncShiftTimerUI() {
             const btn = document.getElementById('shiftToggleBtn');
@@ -1014,27 +1024,6 @@
             return false;
         }
 
-        function setStrengthMode(mode) {
-            currentStrength = mode;
-            const modes = ['EV', 'PP', 'SH'];
-            modes.forEach(m => {
-                const btn = document.getElementById(`strength-${m}`);
-                if (!btn) return;
-                if (m === mode) {
-                    btn.className = "bg-oilGreen border border-oilGold text-oilGold font-black py-1.5 rounded-lg text-xs active:scale-95 transition";
-                } else {
-                    btn.className = "bg-slate-800 border border-slate-700 text-slate-300 font-bold py-1.5 rounded-lg text-xs active:scale-95 transition";
-                }
-            });
-
-            const hint = document.getElementById('strengthRuleHint');
-            if (hint) {
-                if (mode === 'EV') hint.textContent = "EV: GF +1 / GA -1";
-                else if (mode === 'PP') hint.textContent = "PP: GF 0 / SHG Against -1";
-                else hint.textContent = "SH: SHG For +1 / GA 0";
-            }
-        }
-
         function calculateAutoPlusMinus(statType, strength) {
             // Only track +/- when the strength/PM widget is enabled
             if (!window.buttonSettings || !window.buttonSettings.PM) return 0;
@@ -1071,28 +1060,28 @@
                 window.currentGame.G += amount;
                 window.currentGame.SOG += amount;
                 window.currentGame.teamGoals += amount;
-                pmDelta = calculateAutoPlusMinus('G', currentStrength) * amount;
+                pmDelta = calculateAutoPlusMinus('G', window.strengthMode) * amount;
                 window.currentGame.PM += pmDelta;
                 autoPausedShift = pauseShiftForStoppage();
-                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${currentStrength})`;
+                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${window.strengthMode})`;
                 const pauseTag = autoPausedShift ? ' • Clock Paused' : '';
-                addLiveEventFeed(`GOAL [${currentStrength}] scored! (P${period})${pmTag}${pauseTag}`);
+                addLiveEventFeed(`GOAL [${window.strengthMode}] scored! (P${period})${pmTag}${pauseTag}`);
             } else if (statType === 'A') {
                 window.currentGame.A += amount;
-                pmDelta = calculateAutoPlusMinus('A', currentStrength) * amount;
+                pmDelta = calculateAutoPlusMinus('A', window.strengthMode) * amount;
                 window.currentGame.PM += pmDelta;
                 autoPausedShift = pauseShiftForStoppage();
-                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${currentStrength})`;
+                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${window.strengthMode})`;
                 const pauseTag = autoPausedShift ? ' • Clock Paused' : '';
-                addLiveEventFeed(`Assist [${currentStrength}] recorded (P${period})${pmTag}${pauseTag}`);
+                addLiveEventFeed(`Assist [${window.strengthMode}] recorded (P${period})${pmTag}${pauseTag}`);
             } else if (statType === 'OPP_G') {
                 window.currentGame.oppGoals += amount;
-                pmDelta = calculateAutoPlusMinus('OPP_G', currentStrength) * amount;
+                pmDelta = calculateAutoPlusMinus('OPP_G', window.strengthMode) * amount;
                 window.currentGame.PM += pmDelta;
                 autoPausedShift = pauseShiftForStoppage();
-                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${currentStrength})`;
+                const pmTag = pmDelta !== 0 ? ` (${pmDelta > 0 ? '+1' : '-1'} +/-)` : ` (0 +/- ${window.strengthMode})`;
                 const pauseTag = autoPausedShift ? ' • Clock Paused' : '';
-                addLiveEventFeed(`Opponent goal [${currentStrength}] (P${period})${pmTag}${pauseTag}`);
+                addLiveEventFeed(`Opponent goal [${window.strengthMode}] (P${period})${pmTag}${pauseTag}`);
             } else if (statType === 'FOW') {
                 window.currentGame.FOW += amount;
                 addLiveEventFeed(`Faceoff Won (P${period})`);
@@ -1192,7 +1181,14 @@
                 "Finish & Save Game",
                 `Save final game vs ${opp} (${g.G}G, ${g.A}A, ${g.G + g.A} PTS) to the season log?`,
                 () => {
-                    if (isShiftOnIce) endCurrentShift();
+                    if (isShiftActive) {
+                        isShiftActive = false;
+                        isShiftStopped = false;
+                        clearInterval(shiftInterval);
+                        currentShiftSeconds = 0;
+                        document.getElementById('shiftClockDisplay').textContent = "00:00";
+                        syncShiftTimerUI();
+                    }
                     const resPrefix = g.teamGoals > g.oppGoals ? "W" : (g.teamGoals < g.oppGoals ? "L" : "T");
                     const newGame = window.normalizeGameRecord({
                         id: 'g_' + Date.now(),
