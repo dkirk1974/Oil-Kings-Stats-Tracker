@@ -2087,13 +2087,14 @@
             const sog = activeRows.reduce((s, x) => s + x.SOG, 0);
             const fow = activeRows.reduce((s, x) => s + x.FOW, 0);
             const fol = activeRows.reduce((s, x) => s + x.FOL, 0);
+            const pim = activeRows.reduce((s, x) => s + x.PIM, 0);
 
             document.getElementById('statPPG').textContent = gp > 0 ? (pts / gp).toFixed(2) : "0.00";
             document.getElementById('statShPct').textContent = sog > 0 ? ((g / sog) * 100).toFixed(1) + "%" : "0.0%";
             document.getElementById('statFOPct').textContent = (fow + fol) > 0 ? ((fow / (fow + fol)) * 100).toFixed(1) + "%" : "0.0%";
 
             const tbody = document.getElementById('careerStatsBody');
-            tbody.innerHTML = seasonRows.map(r => {
+            const rowsHtml = seasonRows.map(r => {
                 const foPct = (r.FOW + r.FOL) > 0 ? Math.round((r.FOW / (r.FOW + r.FOL)) * 100) + "%" : "-";
 
                 return `
@@ -2110,6 +2111,24 @@
                     </tr>
                 `;
             }).join('');
+
+            const totalFoPct = (fow + fol) > 0 ? Math.round((fow / (fow + fol)) * 100) + "%" : "-";
+            const totalLabel = filter === 'ALL' ? 'TOTALS (ALL)' : `TOTALS (${filter})`;
+            const totalsRowHtml = `
+                <tr class="bg-slate-950/90 border-t-2 border-oilGold/50 font-black text-white">
+                    <td class="p-2 text-oilGold uppercase text-[10px]">${totalLabel}</td>
+                    <td class="p-2 text-center">${gp}</td>
+                    <td class="p-2 text-center text-emerald-400">${g}</td>
+                    <td class="p-2 text-center text-blue-400">${a}</td>
+                    <td class="p-2 text-center text-oilGold">${pts}</td>
+                    <td class="p-2 text-center">${sog}</td>
+                    <td class="p-2 text-center">${totalFoPct}</td>
+                    <td class="p-2 text-center text-amber-400">${pim}</td>
+                    <td class="p-2 text-center text-slate-500">—</td>
+                </tr>
+            `;
+
+            tbody.innerHTML = rowsHtml + totalsRowHtml;
         };
 
         // SMS Recap Generator
