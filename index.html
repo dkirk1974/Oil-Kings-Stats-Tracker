@@ -426,6 +426,21 @@
                         <button type="button" onclick="prepareSMS('FINAL Game Recap')" class="bg-oilGreen hover:bg-emerald-800 border border-oilGold/50 text-oilGold font-black py-2 rounded-lg text-[11px]">FINAL</button>
                     </div>
 
+                    <div class="space-y-1.5 pt-1 border-t border-slate-800/80">
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <button type="button" onclick="prepareYTDStatsSMS()" class="bg-slate-800 hover:bg-slate-700 border border-oilGold/40 text-oilGold font-black py-2 rounded-lg text-[11px]">YTD Stats (2026-27)</button>
+                            <button type="button" onclick="prepareCareerStatsSMS()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-black py-2 rounded-lg text-[11px]">Career Stats</button>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <select id="smsPastSeasonSelect" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-[11px] text-white font-bold focus:border-oilGold focus:outline-none">
+                                <option value="2025-26">2025-26 Season</option>
+                            </select>
+                            <button type="button" onclick="preparePastSeasonStatsSMS()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-oilGold font-black px-3 py-1.5 rounded-lg text-[11px] shrink-0">
+                                Send Past Season
+                            </button>
+                        </div>
+                    </div>
+
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Preview Message</label>
                         <textarea id="smsPreviewBox" rows="7" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:border-oilGold focus:outline-none"></textarea>
@@ -1924,7 +1939,70 @@
         };
 
         // SMS Recap Generator
+        function syncSMSPastSeasonOptions() {
+            const select = document.getElementById('smsPastSeasonSelect');
+            if (!select) return;
+            const pastSeasons = getAllSeasonNames().filter(s => s !== '2026-27');
+            const options = pastSeasons.length > 0 ? pastSeasons : ['2025-26'];
+            const prev = select.value;
+            select.innerHTML = options.map(s => `<option value="${s}">${s} Season</option>`).join('');
+            if (options.includes(prev)) {
+                select.value = prev;
+            }
+        }
+
+        function formatSeasonOrCareerSMS(titleText, totals, includeGP = true) {
+            const p = window.playerProfile;
+            const pts = totals.G + totals.A;
+            const totalFO = totals.FOW + totals.FOL;
+            const foStr = totalFO > 0 ? `${totals.FOW}/${totalFO} (${Math.round((totals.FOW / totalFO) * 100)}%)` : "0/0";
+            const shPct = totals.SOG > 0 ? `${((totals.G / totals.SOG) * 100).toFixed(1)}%` : "0.0%";
+
+            const lines = [
+                `🏒 SWZ Oil Kings — ${titleText}`,
+                `#${p.jersey} ${p.firstName} ${p.lastName}:`,
+                ...(includeGP ? [`• ${totals.GP} GP | ${totals.G}G, ${totals.A}A (${pts} PTS)`] : [`• ${totals.G}G, ${totals.A}A (${pts} PTS)`]),
+                `• ${totals.SOG} SOG (${shPct} SH%)`,
+                `• Faceoffs: ${foStr}`,
+                `• PIM: ${totals.PIM}`
+            ];
+
+            return lines.join('\n');
+        }
+
+        function prepareYTDStatsSMS() {
+            syncSMSPastSeasonOptions();
+            const ytd = getSeasonTotals('2026-27');
+            document.getElementById('smsPreviewBox').value = formatSeasonOrCareerSMS('2026-27 YTD Stats', ytd, true);
+        }
+
+        function preparePastSeasonStatsSMS() {
+            syncSMSPastSeasonOptions();
+            const select = document.getElementById('smsPastSeasonSelect');
+            const seasonName = (select && select.value) || '2025-26';
+            const seasonTotals = getSeasonTotals(seasonName);
+            document.getElementById('smsPreviewBox').value = formatSeasonOrCareerSMS(`${seasonName} Season Stats`, seasonTotals, true);
+        }
+
+        function prepareCareerStatsSMS() {
+            syncSMSPastSeasonOptions();
+            const rows = getAllSeasonNames().map(s => getSeasonTotals(s));
+            const careerTotals = rows.reduce((acc, r) => {
+                acc.GP += r.GP;
+                acc.G += r.G;
+                acc.A += r.A;
+                acc.SOG += r.SOG;
+                acc.FOW += r.FOW;
+                acc.FOL += r.FOL;
+                acc.PIM += r.PIM;
+                return acc;
+            }, { GP: 0, G: 0, A: 0, SOG: 0, FOW: 0, FOL: 0, PIM: 0 });
+
+            document.getElementById('smsPreviewBox').value = formatSeasonOrCareerSMS('EFHL Official Career Stats', careerTotals, true);
+        }
+
         function prepareSMS(stageLabel) {
+            syncSMSPastSeasonOptions();
             const p = window.playerProfile;
             const g = window.currentGame;
             const opp = document.getElementById('liveOpponent').value.trim() || "Opponent";
