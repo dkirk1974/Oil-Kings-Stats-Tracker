@@ -738,7 +738,9 @@
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Paste your Firebase config object here when ready to link to Cloud Firestore
+        // Hockey data writes to its own independent Firestore document path so it never collides with Gin Rummy data.
         const MANUAL_FIREBASE_CONFIG = null;
+        const HOCKEY_CLOUD_DOC_PATH = ['hockeyTracker_swzOilKings', 'sharedState'];
 
         window.cloudSync = {
             isReady: false,
@@ -779,7 +781,7 @@
             },
 
             getSharedDocRef() {
-                return doc(this.db, 'artifacts', this.appId, 'public', 'data', 'hockeyTracker', 'sharedState');
+                return doc(this.db, 'artifacts', this.appId, 'public', 'data', ...HOCKEY_CLOUD_DOC_PATH);
             },
 
             async init() {
