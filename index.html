@@ -721,7 +721,7 @@
 
             <div>
                 <label class="text-[10px] text-slate-400 font-bold uppercase block mb-1">Cloud Config (JSON or JS Object)</label>
-                <textarea id="cloudConfigInput" rows="5" placeholder='{"apiKey":"...","projectId":"..."}' class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-[11px] font-mono text-slate-200 focus:border-oilGold focus:outline-none"></textarea>
+                <textarea id="cloudConfigInput" rows="7" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","storageBucket":"...","messagingSenderId":"...","appId":"..."}' class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-[11px] font-mono text-slate-200 focus:border-oilGold focus:outline-none"></textarea>
             </div>
 
             <div class="flex gap-2 pt-1">
@@ -741,12 +741,21 @@
         // Hockey data writes to its own independent Firestore document path so it never collides with Gin Rummy data.
         const MANUAL_FIREBASE_CONFIG = null;
         const HOCKEY_CLOUD_DOC_PATH = ['hockeyTracker_swzOilKings', 'sharedState'];
+        const DEFAULT_CONFIG_TEMPLATE = JSON.stringify({
+            apiKey: "",
+            authDomain: "",
+            projectId: "",
+            storageBucket: "",
+            messagingSenderId: "",
+            appId: ""
+        }, null, 2);
 
         window.cloudSync = {
             isReady: false,
             db: null,
             user: null,
             appId: typeof __app_id !== 'undefined' && __app_id ? String(__app_id) : 'swz-oil-kings-tracker',
+            template: DEFAULT_CONFIG_TEMPLATE,
 
             updateBadge(text, colorClass) {
                 const badge = document.getElementById('cloudSyncBadge');
@@ -788,7 +797,7 @@
                 try {
                     const savedManual = this.getSavedManualConfig();
                     const config = savedManual || MANUAL_FIREBASE_CONFIG || (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null);
-                    if (!config) {
+                    if (!config || !config.apiKey) {
                         this.isReady = false;
                         this.updateBadge("Local Mode", "text-amber-400");
                         return;
@@ -896,7 +905,7 @@
                 const input = document.getElementById('cloudConfigInput');
                 if (input && window.cloudSync && typeof window.cloudSync.getSavedManualConfig === 'function') {
                     const existing = window.cloudSync.getSavedManualConfig();
-                    input.value = existing ? JSON.stringify(existing, null, 2) : "";
+                    input.value = existing ? JSON.stringify(existing, null, 2) : (window.cloudSync.template || "");
                 }
                 modal.classList.remove('hidden');
             } else {
@@ -937,7 +946,7 @@
 
         function clearSavedCloudConfig() {
             const input = document.getElementById('cloudConfigInput');
-            if (input) input.value = "";
+            if (input) input.value = (window.cloudSync && window.cloudSync.template) || "";
             if (window.cloudSync && typeof window.cloudSync.setManualConfig === 'function') {
                 window.cloudSync.setManualConfig(null);
             }
@@ -1083,6 +1092,9 @@
             try {
                 loadFromStorage();
                 populateSampleDataIfEmpty();
+                if (window.cloudSync && typeof window.cloudSync.init === 'function') {
+                    window.cloudSync.init();
+                }
                 setStrengthMode(window.strengthMode);
                 syncPenaltyUI();
                 applyButtonSettings();
